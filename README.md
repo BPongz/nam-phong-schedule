@@ -41,3 +41,10 @@ http://localhost:3000
 
 ## 🛑 วิธีปิดระบบ
 เมื่อเลิกใช้งานแล้ว ให้กลับไปที่หน้าต่างสีดำ (cmd/Terminal) แล้วกดปุ่มบนคีย์บอร์ด Ctrl + C จากนั้นปิดหน้าต่างสีดำทิ้งได้เลยครับ
+
+## Stack
+1. Frontend: HTML5, CSS3 (Vanilla), JavaScript (ES6) — ไม่ใช้ Framework
+2. Backend: Node.js + Express.js
+3. Database: Lowdb (ฐานข้อมูลแบบไฟล์ JSON)
+4. API: RESTful API
+5. Libraries อื่นๆ: uuid (สร้างไอดี), cors (อนุญาตการรับส่งข้อมูล)
