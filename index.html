@@ -1,0 +1,4608 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ระบบลงทะเบียนเรียน — วิทยาลัยเทคนิคน้ำพอง</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f0eef6;
+        --bg2: #e8e4f2;
+        --bg3: #ddd8ee;
+        --card: #faf9fd;
+        --card2: #f0eef8;
+        --border: #d0caeb;
+        --accent: #7c3aed;
+        --accent2: #6d28d9;
+        --accent3: #8b5cf6;
+        --green: #059669;
+        --red: #dc2626;
+        --orange: #d97706;
+        --purple: #7c3aed;
+        --text: #2d1f5e;
+        --text2: #4c3d7a;
+        --text3: #8b7db3;
+        --shadow: 0 4px 24px rgba(100, 70, 180, 0.12);
+        --radius: 12px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        font-family: "Sarabun", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+      }
+      .app {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .sidebar {
+        width: 260px;
+        min-width: 260px;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .topbar {
+        background: var(--bg2);
+        border-bottom: 1px solid var(--border);
+        padding: 0 24px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+      .logo {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .logo-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--accent);
+        line-height: 1.3;
+      }
+      .logo-sub {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .nav-section {
+        padding: 16px 12px 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text3);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        margin: 2px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: var(--text2);
+        transition: all 0.15s;
+        font-size: 13px;
+      }
+      .nav-item:hover:not(.nav-disabled) {
+        background: var(--bg3);
+        color: var(--text);
+      }
+      .nav-item.active {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.15),
+          rgba(124, 58, 237, 0.08)
+        );
+        color: var(--accent2);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+      }
+      .nav-item.nav-disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .nav-icon {
+        width: 18px;
+        height: 18px;
+        opacity: 0.8;
+      }
+      .topbar-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .role-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .role-teacher {
+        background: rgba(124, 58, 237, 0.12);
+        color: var(--accent2);
+        border: 1px solid rgba(124, 58, 237, 0.25);
+      }
+      .role-student {
+        background: rgba(5, 150, 105, 0.12);
+        color: #047857;
+        border: 1px solid rgba(5, 150, 105, 0.25);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+      .card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .card-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .card-body {
+        padding: 20px;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          var(--glow-from, 0.1),
+          transparent 60%
+        );
+      }
+      .stat-num {
+        font-family: "Kanit", sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1;
+      }
+      .stat-label {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 4px;
+      }
+      .stat-icon {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 36px;
+        opacity: 0.15;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text3);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(208, 202, 235, 0.5);
+        font-size: 13px;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      tr:hover td {
+        background: rgba(124, 58, 237, 0.04);
+      }
+      .timetable {
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+      .timetable-head {
+        display: grid;
+        background: var(--card2);
+        border-bottom: 1px solid var(--border);
+      }
+      .timetable-body {
+        background: var(--card);
+      }
+      .timetable-row {
+        display: grid;
+        border-bottom: 1px solid rgba(208, 202, 235, 0.6);
+        min-height: 56px;
+      }
+      .timetable-row:last-child {
+        border-bottom: none;
+      }
+      .tt-cell {
+        padding: 6px 8px;
+        border-right: 1px solid rgba(208, 202, 235, 0.6);
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 56px;
+      }
+      .tt-cell:last-child {
+        border-right: none;
+      }
+      .tt-head-cell {
+        padding: 8px 6px;
+        border-right: 1px solid rgba(208, 202, 235, 0.6);
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text3);
+        text-align: center;
+      }
+      .tt-day {
+        font-family: "Kanit", sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        background: var(--bg3);
+      }
+      .tt-subject {
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-size: 10px;
+        line-height: 1.3;
+        width: 100%;
+        text-align: center;
+      }
+      .tt-subject.color-1 {
+        background: rgba(124, 58, 237, 0.12);
+        color: #5b21b6;
+        border: 1px solid rgba(124, 58, 237, 0.25);
+      }
+      .tt-subject.color-2 {
+        background: rgba(5, 150, 105, 0.12);
+        color: #065f46;
+        border: 1px solid rgba(5, 150, 105, 0.25);
+      }
+      .tt-subject.color-3 {
+        background: rgba(59, 130, 246, 0.12);
+        color: #1e40af;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+      }
+      .tt-subject.color-4 {
+        background: rgba(217, 119, 6, 0.12);
+        color: #92400e;
+        border: 1px solid rgba(217, 119, 6, 0.25);
+      }
+      .tt-subject.color-5 {
+        background: rgba(220, 38, 38, 0.1);
+        color: #991b1b;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+      }
+      .tt-subject.color-6 {
+        background: rgba(14, 165, 233, 0.12);
+        color: #0c4a6e;
+        border: 1px solid rgba(14, 165, 233, 0.25);
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text2);
+        margin-bottom: 6px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 9px 12px;
+        color: var(--text);
+        font-family: "Sarabun", sans-serif;
+        font-size: 13px;
+        transition: border 0.15s;
+        outline: none;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+      }
+      select option {
+        background: var(--card);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-family: "Sarabun", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.15s;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+      .btn-success {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn-success:hover {
+        background: #047857;
+      }
+      .btn-danger {
+        background: transparent;
+        color: var(--red);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+      }
+      .btn-danger:hover {
+        background: rgba(220, 38, 38, 0.08);
+      }
+      .btn-danger-solid {
+        background: var(--red);
+        color: #fff;
+      }
+      .btn-danger-solid:hover {
+        background: #b91c1c;
+      }
+      .btn-warning {
+        background: transparent;
+        color: var(--orange);
+        border: 1px solid rgba(217, 119, 6, 0.3);
+      }
+      .btn-warning:hover {
+        background: rgba(217, 119, 6, 0.08);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text2);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover {
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .badge-blue {
+        background: rgba(124, 58, 237, 0.12);
+        color: var(--accent2);
+      }
+      .badge-green {
+        background: rgba(5, 150, 105, 0.12);
+        color: #047857;
+      }
+      .badge-red {
+        background: rgba(220, 38, 38, 0.1);
+        color: #b91c1c;
+      }
+      .badge-orange {
+        background: rgba(217, 119, 6, 0.12);
+        color: #92400e;
+      }
+      .badge-purple {
+        background: rgba(124, 58, 237, 0.12);
+        color: #5b21b6;
+      }
+      .drag-zone {
+        background: var(--bg3);
+        border: 2px dashed var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+        min-height: 160px;
+        transition: all 0.2s;
+      }
+      .drag-item {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .drag-item:hover {
+        border-color: var(--accent);
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+      }
+      .drag-handle {
+        color: var(--text3);
+        font-size: 14px;
+      }
+      .subject-code {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+        font-family: "Kanit", sans-serif;
+      }
+      .subject-name {
+        font-size: 12px;
+        color: var(--text);
+      }
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(45, 31, 94, 0.35);
+        backdrop-filter: blur(4px);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        width: 500px;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 48px rgba(100, 70, 180, 0.15);
+      }
+      .modal-wide {
+        width: 680px;
+      }
+      .modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .modal-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        color: var(--text3);
+        cursor: pointer;
+        font-size: 20px;
+        line-height: 1;
+        padding: 4px;
+        border-radius: 6px;
+      }
+      .modal-close:hover {
+        background: var(--bg3);
+        color: var(--text);
+      }
+      .modal-body {
+        padding: 24px;
+      }
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .toast {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        min-width: 260px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.2s ease;
+        box-shadow: var(--shadow);
+      }
+      .toast.success {
+        border-color: rgba(5, 150, 105, 0.3);
+      }
+      .toast.error {
+        border-color: rgba(220, 38, 38, 0.3);
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+      .empty-state {
+        text-align: center;
+        padding: 48px;
+        color: var(--text3);
+      }
+      .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.4;
+      }
+      .section-title {
+        font-family: "Kanit", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 20px 0;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+      .scroll-x {
+        overflow-x: auto;
+      }
+      .period-picker {
+        display: grid;
+        grid-template-columns: repeat(11, 1fr);
+        gap: 4px;
+        margin-top: 6px;
+      }
+      .period-btn {
+        padding: 6px 0;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--bg3);
+        color: var(--text2);
+        cursor: pointer;
+        font-size: 10px;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .period-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent2);
+      }
+      .period-btn.selected {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .period-btn.break {
+        background: rgba(217, 119, 6, 0.08);
+        color: var(--orange);
+        border-color: rgba(217, 119, 6, 0.2);
+        cursor: not-allowed;
+      }
+      .info-row {
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+      .info-key {
+        color: var(--text3);
+        min-width: 130px;
+      }
+      .info-val {
+        color: var(--text);
+        font-weight: 500;
+      }
+      /* Checkbox styling */
+      .cb-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--accent);
+      }
+      /* Bulk action bar */
+      .bulk-bar {
+        display: none;
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+        align-items: center;
+        gap: 12px;
+      }
+      .bulk-bar.visible {
+        display: flex;
+      }
+      /* Export styles */
+      .export-preview {
+        background: var(--bg3);
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 12px;
+      }
+      /* Approval request styles */
+      .request-item {
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .request-status {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 10px;
+      }
+      .req-pending {
+        background: rgba(217, 119, 6, 0.12);
+        color: #92400e;
+      }
+      .req-approved {
+        background: rgba(5, 150, 105, 0.12);
+        color: #047857;
+      }
+      .req-rejected {
+        background: rgba(220, 38, 38, 0.1);
+        color: #b91c1c;
+      }
+      /* Tab styles */
+      .tab-group {
+        display: flex;
+        gap: 4px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--text3);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: all 0.15s;
+      }
+      .tab:hover {
+        color: var(--text2);
+      }
+      .tab.active {
+        color: var(--accent2);
+        border-bottom-color: var(--accent);
+        font-weight: 600;
+      }
+      .tab-pane {
+        display: none;
+      }
+      .tab-pane.active {
+        display: block;
+      }
+      /* Print styles for export */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: #fff;
+          color: #000;
+        }
+        .print-area {
+          background: #fff;
+          color: #000;
+          padding: 20px;
+        }
+        table {
+          border-collapse: collapse;
+        }
+        th,
+        td {
+          border: 1px solid #ccc;
+          padding: 6px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="logo">
+          <div class="logo-title">📚 ระบบลงทะเบียนเรียน</div>
+          <div class="logo-sub" id="sidebar-school-name">
+            วิทยาลัยเทคนิคน้ำพอง
+          </div>
+        </div>
+
+        <div id="teacher-nav">
+          <div class="nav-section">ครูผู้สอน</div>
+          <div class="nav-item" onclick="navigate('t-dashboard')">
+            <span>📊</span> ภาพรวม
+          </div>
+          <div class="nav-item" onclick="navigate('t-subjects')">
+            <span>📖</span> จัดการรายวิชา
+          </div>
+          <div class="nav-item" onclick="navigate('t-schedule')">
+            <span>📅</span> ตารางสอน
+          </div>
+          <div class="nav-item" onclick="navigate('t-timetable')">
+            <span>🗓️</span> ดูตารางสอน
+          </div>
+          <div class="nav-item" onclick="navigate('t-approve')">
+            <span>✅</span> อนุมัตินักเรียน<span
+              id="pending-badge"
+              class="badge badge-orange"
+              style="margin-left: auto; display: none"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="navigate('t-export')">
+            <span>📤</span> Export ตาราง
+          </div>
+        </div>
+
+        <div id="student-nav" style="display: none">
+          <div class="nav-section">นักเรียน</div>
+          <div class="nav-item" onclick="navigate('s-dashboard')">
+            <span>🏠</span> หน้าแรก
+          </div>
+          <div
+            class="nav-item"
+            id="nav-s-register"
+            onclick="navigate('s-register')"
+          >
+            <span>✏️</span> ลงทะเบียนเรียน
+          </div>
+          <div
+            class="nav-item"
+            id="nav-s-timetable"
+            onclick="navigate('s-timetable')"
+          >
+            <span>🗓️</span> ตารางเรียนของฉัน
+          </div>
+          <div
+            class="nav-item"
+            id="nav-s-export"
+            onclick="navigate('s-export')"
+          >
+            <span>📤</span> Export ตาราง
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid var(--border);
+          "
+        >
+          <div style="font-size: 11px; color: var(--text3); margin-bottom: 8px">
+            โหมดการใช้งาน
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="btn btn-sm"
+              id="btn-teacher-mode"
+              onclick="requestTeacherMode()"
+              style="flex: 1"
+            >
+              👨‍🏫 ครู
+            </button>
+            <button
+              class="btn btn-sm"
+              id="btn-student-mode"
+              onclick="setMode('student')"
+              style="flex: 1"
+            >
+              👨‍🎓 นักเรียน
+            </button>
+          </div>
+          <div
+            id="current-user-info"
+            style="margin-top: 10px; font-size: 11px; color: var(--text2)"
+          ></div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="main">
+        <div class="topbar">
+          <div class="topbar-title" id="topbar-title">ภาพรวม</div>
+          <div class="topbar-right">
+            <span
+              id="topbar-semester"
+              style="
+                font-size: 12px;
+                color: var(--text2);
+                margin-right: 4px;
+                cursor: pointer;
+              "
+              onclick="showSettingsModal()"
+              title="คลิกเพื่อตั้งค่า"
+              >📅 <span id="semester-display">กำลังโหลด...</span></span
+            >
+            <span id="topbar-role" class="role-badge role-teacher"
+              >👨‍🏫 ครูผู้สอน</span
+            >
+            <button
+              class="btn btn-ghost btn-sm"
+              onclick="showSelectUserModal()"
+            >
+              🔄 เปลี่ยนผู้ใช้
+            </button>
+          </div>
+        </div>
+        <div class="content">
+          <!-- ======= TEACHER DASHBOARD ======= -->
+          <div class="page" id="page-t-dashboard">
+            <div class="section-title">📊 ภาพรวมระบบ</div>
+            <div class="stats-grid">
+              <div
+                class="stat-card"
+                style="--glow-from: rgba(59, 130, 246, 0.15)"
+              >
+                <div class="stat-icon">📖</div>
+                <div
+                  class="stat-num"
+                  id="stat-subjects"
+                  style="color: var(--accent2)"
+                >
+                  -
+                </div>
+                <div class="stat-label">รายวิชาทั้งหมด</div>
+              </div>
+              <div
+                class="stat-card"
+                style="--glow-from: rgba(16, 185, 129, 0.15)"
+              >
+                <div class="stat-icon">✅</div>
+                <div
+                  class="stat-num"
+                  id="stat-scheduled"
+                  style="color: var(--green)"
+                >
+                  -
+                </div>
+                <div class="stat-label">วิชาที่ลงตารางแล้ว</div>
+              </div>
+              <div
+                class="stat-card"
+                style="--glow-from: rgba(239, 68, 68, 0.15)"
+              >
+                <div class="stat-icon">⚠️</div>
+                <div
+                  class="stat-num"
+                  id="stat-unscheduled"
+                  style="color: var(--red)"
+                >
+                  -
+                </div>
+                <div class="stat-label">วิชาที่ยังไม่ได้ลงตาราง</div>
+              </div>
+              <div
+                class="stat-card"
+                style="--glow-from: rgba(245, 158, 11, 0.15)"
+              >
+                <div class="stat-icon">👨‍🎓</div>
+                <div
+                  class="stat-num"
+                  id="stat-students"
+                  style="color: var(--orange)"
+                >
+                  -
+                </div>
+                <div class="stat-label">นักเรียนทั้งหมด</div>
+              </div>
+              <div
+                class="stat-card"
+                style="--glow-from: rgba(139, 92, 246, 0.15)"
+              >
+                <div class="stat-icon">🕐</div>
+                <div
+                  class="stat-num"
+                  id="stat-pending"
+                  style="color: var(--purple)"
+                >
+                  -
+                </div>
+                <div class="stat-label">รออนุมัติ</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">⚠️ รายวิชาที่ยังไม่ได้ลงตารางสอน</div>
+              </div>
+              <div class="card-body">
+                <div id="unregistered-subjects-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= TEACHER SUBJECTS ======= -->
+          <div class="page" id="page-t-subjects">
+            <div class="section-title">
+              📖 จัดการรายวิชา
+              <button
+                class="btn btn-primary btn-sm"
+                style="margin-left: auto"
+                onclick="showAddSubjectModal()"
+              >
+                + เพิ่มวิชา
+              </button>
+              <button
+                class="btn btn-danger btn-sm"
+                onclick="deleteAllSubjects()"
+              >
+                🗑 ลบทั้งหมด
+              </button>
+            </div>
+            <!-- Bulk action bar -->
+            <div class="bulk-bar" id="subject-bulk-bar">
+              <span
+                id="subject-selected-count"
+                style="font-size: 12px; color: var(--text2)"
+                >เลือก 0 รายการ</span
+              >
+              <button
+                class="btn btn-danger btn-sm"
+                onclick="deleteSelectedSubjects()"
+              >
+                🗑 ลบที่เลือก
+              </button>
+              <button
+                class="btn btn-ghost btn-sm"
+                onclick="clearSubjectSelection()"
+              >
+                ✕ ยกเลิก
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-body" style="padding: 0">
+                <div class="table-wrap">
+                  <table id="subjects-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 36px">
+                          <input
+                            type="checkbox"
+                            id="select-all-subjects"
+                            onchange="toggleSelectAllSubjects(this.checked)"
+                            title="เลือกทั้งหมด"
+                          />
+                        </th>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th>ท.</th>
+                        <th>ป.</th>
+                        <th>น.</th>
+                        <th>รวม(ชม.)</th>
+                        <th>สถานะ</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="subjects-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= TEACHER SCHEDULE ======= -->
+          <div class="page" id="page-t-schedule">
+            <div class="section-title">📅 ลงตารางสอน</div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px"
+            >
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">📌 วิชาที่ยังไม่ได้ลงตาราง</div>
+                </div>
+                <div class="card-body">
+                  <div id="unscheduled-drag-list"></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">➕ เพิ่มตารางสอน</div>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label>วิชา</label>
+                    <select
+                      id="sched-subject"
+                      onchange="onSchedSubjectChange()"
+                    >
+                      <option value="">-- เลือกวิชา --</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>ครู</label>
+                    <select id="sched-teacher">
+                      <option value="">-- เลือกครู --</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>กลุ่มเรียน</label>
+                    <input
+                      id="sched-group"
+                      placeholder="รหัสกลุ่ม เช่น 683014302"
+                    />
+                  </div>
+                  <!-- Multi-day schedule slots -->
+                  <div class="form-group">
+                    <label
+                      >ช่วงคาบสอน
+                      <span
+                        id="sched-hours-info"
+                        style="
+                          color: var(--text3);
+                          font-size: 11px;
+                          font-weight: normal;
+                        "
+                      ></span
+                    ></label>
+                    <div
+                      id="sched-day-slots"
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        margin-bottom: 8px;
+                      "
+                    ></div>
+                    <button
+                      class="btn btn-ghost btn-sm"
+                      onclick="addSchedDaySlot()"
+                      id="sched-add-day-btn"
+                      style="width: 100%"
+                    >
+                      ➕ เพิ่มวันสอน
+                    </button>
+                  </div>
+                  <div
+                    id="sched-total-label"
+                    style="
+                      font-size: 12px;
+                      color: var(--text3);
+                      margin-bottom: 10px;
+                      padding: 8px;
+                      background: var(--bg2);
+                      border-radius: 8px;
+                      display: none;
+                    "
+                  ></div>
+                  <button
+                    class="btn btn-primary"
+                    style="width: 100%"
+                    onclick="addSchedule()"
+                  >
+                    💾 บันทึกตารางสอน
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px" class="card">
+              <div class="card-header">
+                <div class="card-title">📋 ตารางสอนที่ลงแล้ว</div>
+                <div style="display: flex; gap: 8px; align-items: center">
+                  <div
+                    class="bulk-bar"
+                    id="sched-bulk-bar"
+                    style="margin-bottom: 0; padding: 6px 12px"
+                  >
+                    <span
+                      id="sched-selected-count"
+                      style="font-size: 12px; color: var(--text2)"
+                      >เลือก 0 รายการ</span
+                    >
+                    <button
+                      class="btn btn-danger btn-sm"
+                      onclick="deleteSelectedSchedules()"
+                    >
+                      🗑 ลบที่เลือก
+                    </button>
+                    <button
+                      class="btn btn-ghost btn-sm"
+                      onclick="clearSchedSelection()"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <button
+                    class="btn btn-danger btn-sm"
+                    onclick="deleteAllSchedules()"
+                  >
+                    🗑 ยกเลิกทั้งหมด
+                  </button>
+                </div>
+              </div>
+              <div class="card-body" style="padding: 0">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th style="width: 36px">
+                          <input
+                            type="checkbox"
+                            id="select-all-scheds"
+                            onchange="toggleSelectAllScheds(this.checked)"
+                          />
+                        </th>
+                        <th>วัน</th>
+                        <th>คาบ</th>
+                        <th>เวลา</th>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th>ห้อง</th>
+                        <th>กลุ่ม</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="schedules-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= TEACHER TIMETABLE ======= -->
+          <div class="page" id="page-t-timetable">
+            <div class="section-title">🗓️ ตารางสอน</div>
+            <div id="teacher-timetable-wrap"></div>
+            <div style="margin-top: 20px" class="card">
+              <div class="card-header">
+                <div class="card-title">📚 รายวิชาที่สอนทั้งหมดในเทอมนี้</div>
+              </div>
+              <div class="card-body" style="padding: 0">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อวิชา</th>
+                        <th>ท.</th>
+                        <th>ป.</th>
+                        <th>น.</th>
+                        <th>ชม.รวม</th>
+                      </tr>
+                    </thead>
+                    <tbody id="teacher-subjects-summary"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= TEACHER APPROVE ======= -->
+          <div class="page" id="page-t-approve">
+            <div class="section-title">✅ อนุมัตินักเรียน</div>
+            <div class="tab-group">
+              <div class="tab active" onclick="switchApproveTab('pending')">
+                ⏳ รออนุมัติ
+                <span
+                  id="tab-pending-count"
+                  class="badge badge-orange"
+                  style="margin-left: 4px"
+                ></span>
+              </div>
+              <div class="tab" onclick="switchApproveTab('approved')">
+                ✅ อนุมัติแล้ว
+              </div>
+              <div class="tab" onclick="switchApproveTab('rejected')">
+                ❌ ปฏิเสธ
+              </div>
+              <div class="tab" onclick="switchApproveTab('revoked')">
+                ⚠️ ถูกถอน
+              </div>
+            </div>
+            <div id="approve-list"></div>
+          </div>
+
+          <!-- ======= TEACHER EXPORT ======= -->
+          <div class="page" id="page-t-export">
+            <div class="section-title">📤 Export ตารางสอน</div>
+            <div class="card">
+              <div class="card-body">
+                <div class="form-group">
+                  <label>เลือกครู</label>
+                  <select
+                    id="export-teacher-sel"
+                    onchange="previewTeacherExport()"
+                  >
+                    <option value="">-- เลือกครู --</option>
+                  </select>
+                </div>
+                <div
+                  style="display: flex; gap: 10px; margin-top: 8px"
+                  class="no-print"
+                >
+                  <button
+                    class="btn btn-primary"
+                    onclick="exportTeacherTimetablePrint()"
+                  >
+                    🖨️ พิมพ์/บันทึก PDF
+                  </button>
+                  <button class="btn btn-ghost" onclick="exportTeacherCSV()">
+                    📊 Export CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="teacher-export-preview" style="margin-top: 20px"></div>
+          </div>
+
+          <!-- ======= STUDENT DASHBOARD ======= -->
+          <div class="page" id="page-s-dashboard">
+            <div class="section-title">🏠 ข้อมูลนักเรียน</div>
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-body" id="student-info-card"></div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon">📖</div>
+                <div
+                  class="stat-num"
+                  id="s-stat-reg"
+                  style="color: var(--accent2)"
+                >
+                  -
+                </div>
+                <div class="stat-label">วิชาที่ลงทะเบียน</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div
+                  class="stat-num"
+                  id="s-stat-credits"
+                  style="color: var(--green)"
+                >
+                  -
+                </div>
+                <div class="stat-label">หน่วยกิตรวม</div>
+              </div>
+            </div>
+
+            <!-- Enrollment request section -->
+            <div class="card" id="teacher-request-card">
+              <div class="card-header">
+                <div class="card-title">👨‍🏫 ขอเข้าเรียนกับครู</div>
+              </div>
+              <div class="card-body">
+                <div id="my-requests-list"></div>
+                <div class="divider"></div>
+                <div
+                  style="
+                    font-size: 12px;
+                    color: var(--text2);
+                    margin-bottom: 10px;
+                  "
+                >
+                  ส่งคำขอลงทะเบียนกับครูผู้สอน:
+                </div>
+                <div style="display: flex; gap: 10px">
+                  <select id="req-teacher-sel" style="flex: 1">
+                    <option value="">-- เลือกครูผู้สอน --</option>
+                  </select>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    onclick="sendEnrollmentRequest()"
+                  >
+                    📨 ส่งคำขอ
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= STUDENT REGISTER ======= -->
+          <div class="page" id="page-s-register">
+            <div class="section-title">✏️ ลงทะเบียนรายวิชา</div>
+            <div id="student-teacher-info" style="margin-bottom: 16px"></div>
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px"
+            >
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">📌 วิชาที่เปิดสอน (ยังไม่ได้ลง)</div>
+                </div>
+                <div class="card-body" id="available-subjects-panel">
+                  <div class="empty-state">
+                    <div class="empty-icon">🎉</div>
+                    ลงทะเบียนครบทุกวิชาแล้ว
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">✅ วิชาที่ลงทะเบียนแล้ว</div>
+                </div>
+                <div class="card-body" id="registered-subjects-panel">
+                  <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    ยังไม่ได้ลงทะเบียนวิชาใด
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======= STUDENT TIMETABLE ======= -->
+          <div class="page" id="page-s-timetable">
+            <div class="section-title">🗓️ ตารางเรียนของฉัน</div>
+            <div id="student-timetable-wrap"></div>
+          </div>
+
+          <!-- ======= STUDENT EXPORT ======= -->
+          <div class="page" id="page-s-export">
+            <div class="section-title">📤 Export ตารางเรียน</div>
+            <div class="card">
+              <div class="card-body">
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text2);
+                    margin-bottom: 16px;
+                  "
+                  id="s-export-info"
+                ></div>
+                <div style="display: flex; gap: 10px" class="no-print">
+                  <button
+                    class="btn btn-primary"
+                    onclick="exportStudentTimetablePrint()"
+                  >
+                    🖨️ พิมพ์/บันทึก PDF
+                  </button>
+                  <button class="btn btn-ghost" onclick="exportStudentCSV()">
+                    📊 Export CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="student-export-preview" style="margin-top: 20px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Add/Edit Subject -->
+    <div class="modal-overlay" id="modal-add-subject" style="display: none">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-subject-title">
+            ➕ เพิ่มรายวิชา
+          </div>
+          <button class="modal-close" onclick="closeModal('modal-add-subject')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-subject-id" />
+          <div class="form-group">
+            <label>รหัสวิชา</label
+            ><input id="sub-code" placeholder="เช่น 30143-2005" />
+          </div>
+          <div class="form-group">
+            <label>ชื่อวิชา</label
+            ><input id="sub-name" placeholder="ชื่อวิชาภาษาไทย" />
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>ทฤษฎี (ท.)</label
+              ><input id="sub-theory" type="number" min="0" value="0" />
+            </div>
+            <div class="form-group">
+              <label>ปฏิบัติ (ป.)</label
+              ><input id="sub-practice" type="number" min="0" value="0" />
+            </div>
+            <div class="form-group">
+              <label>หน่วยกิต (น.)</label
+              ><input id="sub-credits" type="number" min="0" value="0" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-ghost"
+            onclick="closeModal('modal-add-subject')"
+          >
+            ยกเลิก
+          </button>
+          <button class="btn btn-primary" onclick="saveSubject()">
+            💾 บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Bulk Delete -->
+    <div class="modal-overlay" id="modal-confirm" style="display: none">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="confirm-title">⚠️ ยืนยันการลบ</div>
+          <button class="modal-close" onclick="closeModal('modal-confirm')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <div
+            id="confirm-msg"
+            style="color: var(--text2); line-height: 1.6"
+          ></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">
+            ยกเลิก
+          </button>
+          <button class="btn btn-danger-solid" id="confirm-ok-btn">
+            ✔ ยืนยันลบ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: EDIT SCHEDULE ===== -->
+    <div class="modal-overlay" id="modal-edit-schedule" style="display: none">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <div class="modal-title">✏️ แก้ไขตารางสอน</div>
+          <button
+            class="modal-close"
+            onclick="closeModal('modal-edit-schedule')"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-sched-id" />
+          <input type="hidden" id="edit-sched-total-hours" />
+          <div class="form-group">
+            <label>วิชา</label>
+            <div
+              id="edit-sched-subject-info"
+              style="
+                padding: 9px 12px;
+                background: var(--bg3);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                font-size: 13px;
+                color: var(--text2);
+              "
+            ></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>วัน</label>
+              <select
+                id="edit-sched-day"
+                onchange="
+                  state.editSchedPeriods = []
+                  renderEditPeriods()
+                "
+              >
+                <option>จันทร์</option>
+                <option>อังคาร</option>
+                <option>พุธ</option>
+                <option>พฤหัสบดี</option>
+                <option>ศุกร์</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>ห้องเรียน</label>
+              <input id="edit-sched-room" placeholder="เช่น ชย102" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>กลุ่มเรียน</label>
+            <input
+              id="edit-sched-group"
+              placeholder="รหัสกลุ่ม เช่น 683014302"
+            />
+          </div>
+          <div class="form-group">
+            <label>เลือกคาบ (คลิกเพื่อเลือก/ยกเลิก)</label>
+            <div
+              style="font-size: 11px; color: var(--text3); margin-bottom: 6px"
+            >
+              คาบ 1–4 = 08:20-12:20, คาบ 5–11 = 13:20-20:20
+            </div>
+            <div class="period-picker" id="edit-period-picker">
+              <div class="edit-period-btn period-btn" data-period="1">
+                <div>1</div>
+                <div style="font-size: 8px">08:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="2">
+                <div>2</div>
+                <div style="font-size: 8px">09:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="3">
+                <div>3</div>
+                <div style="font-size: 8px">10:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="4">
+                <div>4</div>
+                <div style="font-size: 8px">11:20</div>
+              </div>
+              <div class="edit-period-btn period-btn break">
+                <div>☕</div>
+                <div style="font-size: 8px">พัก</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="6">
+                <div>6</div>
+                <div style="font-size: 8px">14:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="7">
+                <div>7</div>
+                <div style="font-size: 8px">15:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="8">
+                <div>8</div>
+                <div style="font-size: 8px">16:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="9">
+                <div>9</div>
+                <div style="font-size: 8px">17:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="10">
+                <div>10</div>
+                <div style="font-size: 8px">18:20</div>
+              </div>
+              <div class="edit-period-btn period-btn" data-period="11">
+                <div>11</div>
+                <div style="font-size: 8px">19:20</div>
+              </div>
+            </div>
+            <div
+              id="edit-periods-label"
+              style="margin-top: 8px; font-size: 11px; color: var(--text3)"
+            >
+              ยังไม่ได้เลือกคาบ
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-ghost"
+            onclick="closeModal('modal-edit-schedule')"
+          >
+            ยกเลิก
+          </button>
+          <button class="btn btn-primary" onclick="saveEditSchedule()">
+            💾 บันทึกตารางสอน
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Select / Add User -->
+    <div class="modal-overlay" id="modal-select-user" style="display: none">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <div class="modal-title">👤 เลือก / เพิ่มผู้ใช้งาน</div>
+          <button class="modal-close" onclick="closeModal('modal-select-user')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <div id="user-select-list"></div>
+          <div class="divider"></div>
+          <!-- Add Teacher section (only in teacher mode) -->
+          <div id="add-teacher-section">
+            <div
+              style="font-size: 12px; color: var(--text3); margin-bottom: 10px"
+            >
+              ➕ เพิ่มครูใหม่:
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>ชื่อ-สกุล ครู</label
+                ><input
+                  id="new-teacher-name"
+                  placeholder="ชื่อครู (ตรวจสอบชื่อซ้ำ)"
+                />
+              </div>
+              <div class="form-group">
+                <label>แผนก</label
+                ><input id="new-teacher-dept" placeholder="เช่น ช่างยนต์" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>วุฒิการศึกษา</label
+                ><input
+                  id="new-teacher-edu"
+                  placeholder="เช่น ครุศาสตร์อุตสาหกรรมบัณฑิต"
+                />
+              </div>
+              <div class="form-group">
+                <label>หน้าที่พิเศษ</label
+                ><input
+                  id="new-teacher-duty"
+                  placeholder="เช่น หัวหน้างาน..."
+                />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addTeacher()">
+              👨‍🏫 เพิ่มครู
+            </button>
+          </div>
+          <!-- Add Student section (only in student mode) -->
+          <div id="add-student-section" style="display: none">
+            <div
+              style="font-size: 12px; color: var(--text3); margin-bottom: 10px"
+            >
+              ➕ เพิ่มนักเรียนใหม่:
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>รหัสนักเรียน</label
+                ><input id="new-std-id" placeholder="6830143XXX" />
+              </div>
+              <div class="form-group">
+                <label>ชื่อ-สกุล</label
+                ><input id="new-std-name" placeholder="ชื่อนักเรียน" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>กลุ่มเรียน</label
+              ><input id="new-std-group" value="683014302" />
+            </div>
+            <button class="btn btn-success btn-sm" onclick="addStudent()">
+              ➕ เพิ่มนักเรียน
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODAL: TEACHER PIN ===== -->
+    <div class="modal-overlay" id="modal-teacher-pin" style="display: none">
+      <div class="modal" style="width: 400px; max-width: 95vw">
+        <div
+          class="modal-header"
+          style="
+            border-bottom: 2px solid rgba(124, 58, 237, 0.15);
+            padding: 20px 24px 16px;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 12px">
+            <div
+              style="
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(
+                  135deg,
+                  rgba(124, 58, 237, 0.2),
+                  rgba(124, 58, 237, 0.08)
+                );
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                border: 1px solid rgba(124, 58, 237, 0.2);
+              "
+            >
+              🔐
+            </div>
+            <div>
+              <div class="modal-title" style="font-size: 15px">
+                โหมดครูผู้สอน
+              </div>
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--text3);
+                  font-weight: 400;
+                  margin-top: 2px;
+                "
+              >
+                กรุณากรอกรหัสผ่านเพื่อเข้าใช้งาน
+              </div>
+            </div>
+          </div>
+          <button class="modal-close" onclick="closePinModal()">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 24px">
+          <div class="form-group">
+            <label
+              style="
+                text-align: center;
+                display: block;
+                font-size: 12px;
+                margin-bottom: 8px;
+              "
+              >รหัสผ่านครู</label
+            >
+            <div style="position: relative">
+              <input
+                id="pin-input"
+                type="password"
+                placeholder="กรอกรหัสผ่าน..."
+                style="
+                  text-align: center;
+                  font-size: 15px;
+                  letter-spacing: 4px;
+                  padding: 11px 42px 11px 16px;
+                "
+                onkeydown="if (event.key === 'Enter') submitPin()"
+                autocomplete="off"
+              />
+              <button
+                id="pin-eye-btn"
+                onclick="togglePinEye()"
+                style="
+                  position: absolute;
+                  right: 10px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  background: none;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 15px;
+                  color: var(--text3);
+                  line-height: 1;
+                  padding: 4px;
+                "
+                title="แสดง/ซ่อนรหัสผ่าน"
+              >
+                👁
+              </button>
+            </div>
+            <div
+              id="pin-error-msg"
+              style="
+                display: none;
+                color: var(--red);
+                font-size: 11px;
+                text-align: center;
+                margin-top: 8px;
+                padding: 6px 10px;
+                background: rgba(220, 38, 38, 0.07);
+                border-radius: 6px;
+                border: 1px solid rgba(220, 38, 38, 0.15);
+              "
+            ></div>
+          </div>
+          <button
+            class="btn btn-primary"
+            style="width: 100%; padding: 11px; font-size: 13px; margin-top: 4px"
+            onclick="submitPin()"
+          >
+            🔓 เข้าสู่โหมดครู
+          </button>
+          <button
+            class="btn btn-ghost"
+            style="width: 100%; margin-top: 8px; font-size: 12px"
+            onclick="closePinModal()"
+          >
+            ยกเลิก
+          </button>
+        </div>
+        <!-- Change PIN collapsible -->
+        <div style="border-top: 1px solid var(--border); padding: 12px 24px">
+          <button
+            onclick="toggleChangePinPanel()"
+            style="
+              background: none;
+              border: none;
+              cursor: pointer;
+              color: var(--text3);
+              font-size: 11px;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              font-family: inherit;
+            "
+          >
+            <span
+              id="change-pin-chevron"
+              style="transition: transform 0.2s; display: inline-block"
+              >▶</span
+            >
+            เปลี่ยนรหัสผ่าน
+          </button>
+          <div id="change-pin-panel" style="display: none; margin-top: 12px">
+            <div class="form-group" style="margin-bottom: 10px">
+              <label style="font-size: 11px">รหัสผ่านปัจจุบัน</label>
+              <input
+                id="chg-current"
+                type="password"
+                placeholder="รหัสผ่านเดิม"
+                style="font-size: 13px"
+              />
+            </div>
+            <div class="form-group" style="margin-bottom: 10px">
+              <label style="font-size: 11px"
+                >รหัสผ่านใหม่
+                <span style="color: var(--text3); font-weight: 400"
+                  >(อย่างน้อย 3 ตัว)</span
+                ></label
+              >
+              <input
+                id="chg-new"
+                type="password"
+                placeholder="รหัสผ่านใหม่"
+                style="font-size: 13px"
+              />
+            </div>
+            <div class="form-group" style="margin-bottom: 12px">
+              <label style="font-size: 11px">ยืนยันรหัสผ่านใหม่</label>
+              <input
+                id="chg-confirm"
+                type="password"
+                placeholder="พิมพ์ซ้ำอีกครั้ง"
+                style="font-size: 13px"
+                onkeydown="if (event.key === 'Enter') submitChangePin()"
+              />
+            </div>
+            <div
+              id="chg-msg"
+              style="
+                display: none;
+                font-size: 11px;
+                text-align: center;
+                margin-bottom: 10px;
+                padding: 6px 10px;
+                border-radius: 6px;
+              "
+            ></div>
+            <button
+              class="btn btn-primary btn-sm"
+              style="width: 100%"
+              onclick="submitChangePin()"
+            >
+              💾 บันทึกรหัสผ่านใหม่
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= SETTINGS MODAL ======= -->
+    <div class="modal-overlay" id="modal-settings" style="display: none">
+      <div class="modal" style="max-width: 460px">
+        <div class="modal-header">
+          <div class="modal-title">⚙️ ตั้งค่าระบบ</div>
+          <button class="modal-close" onclick="closeModal('modal-settings')">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div>
+              <label
+                style="
+                  font-weight: 600;
+                  font-size: 13px;
+                  display: block;
+                  margin-bottom: 6px;
+                "
+                >🏫 ชื่อสถาบัน</label
+              >
+              <input
+                id="settings-school-name"
+                type="text"
+                style="width: 100%"
+                placeholder="วิทยาลัยเทคนิคน้ำพอง"
+              />
+            </div>
+            <div>
+              <label
+                style="
+                  font-weight: 600;
+                  font-size: 13px;
+                  display: block;
+                  margin-bottom: 6px;
+                "
+                >📅 ภาคเรียนปัจจุบัน</label
+              >
+              <div style="display: flex; gap: 8px; align-items: center">
+                <select id="settings-semester-term" style="flex: 1">
+                  <option value="1">ภาคเรียนที่ 1</option>
+                  <option value="2">ภาคเรียนที่ 2</option>
+                  <option value="3">ภาคเรียนที่ 3 (ฤดูร้อน)</option>
+                </select>
+                <span style="font-size: 13px; color: var(--text2)">/</span>
+                <input
+                  id="settings-semester-year"
+                  type="text"
+                  style="width: 90px"
+                  placeholder="2568"
+                  maxlength="4"
+                />
+              </div>
+              <div
+                style="font-size: 11px; color: var(--text3); margin-top: 4px"
+              >
+                เช่น 2/2568 (ภาคเรียนที่ 2 ปีการศึกษา 2568)
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('modal-settings')">
+            ยกเลิก
+          </button>
+          <button class="btn btn-primary" onclick="saveSettings()">
+            💾 บันทึก
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+      const API = "http://localhost:3000/api"
+      let state = {
+        mode: "teacher",
+        currentTeacher: null,
+        config: {
+          semester: "2/2568",
+          school_name: "วิทยาลัยเทคนิคน้ำพอง",
+          is_configured: false,
+        },
+        currentStudent: null,
+        subjects: [],
+        teachers: [],
+        schedules: [],
+        students: [],
+        myRegistrations: [],
+        availableSchedules: [],
+        selectedPeriods: [],
+        schedDaySlots: [
+          { day: "จันทร์", periodStart: null, periodEnd: null, room: "" },
+        ],
+        editSchedPeriods: [],
+        draggingSubjectId: null,
+        selectedSubjectIds: new Set(),
+        selectedSchedIds: new Set(),
+        currentApproveTab: "pending",
+      }
+
+      const DAYS = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"]
+      const PERIOD_TIMES = {
+        1: "08:20",
+        2: "09:20",
+        3: "10:20",
+        4: "11:20",
+        5: "13:20",
+        6: "14:20",
+        7: "15:20",
+        8: "16:20",
+        9: "17:20",
+        10: "18:20",
+        11: "19:20",
+      }
+      const PERIOD_END = {
+        1: "09:20",
+        2: "10:20",
+        3: "11:20",
+        4: "12:20",
+        5: "14:20",
+        6: "15:20",
+        7: "16:20",
+        8: "17:20",
+        9: "18:20",
+        10: "19:20",
+        11: "20:20",
+      }
+      const COLORS = [
+        "color-1",
+        "color-2",
+        "color-3",
+        "color-4",
+        "color-5",
+        "color-6",
+      ]
+      let subjectColorMap = {}
+
+      // =========== API ===========
+      async function api(method, path, body) {
+        try {
+          const res = await fetch(API + path, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: body ? JSON.stringify(body) : undefined,
+          })
+          let data
+          const contentType = res.headers.get("content-type") || ""
+          if (contentType.includes("application/json")) {
+            data = await res.json()
+          } else {
+            const txt = await res.text()
+            throw new Error("เซิร์ฟเวอร์ไม่ตอบสนอง (" + res.status + ")")
+          }
+          if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด")
+          return data
+        } catch (e) {
+          if (e.name === "TypeError" && e.message.includes("fetch")) {
+            toast(
+              "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ — รัน node server.js หรือยัง?",
+              "error",
+            )
+          } else {
+            toast(e.message, "error")
+          }
+          throw e
+        }
+      }
+
+      // =========== PIN AUTH ===========
+      const SESSION_KEY = "teacher_pin_ok"
+
+      function isTeacherUnlocked() {
+        return sessionStorage.getItem(SESSION_KEY) === "1"
+      }
+
+      function requestTeacherMode() {
+        if (isTeacherUnlocked()) {
+          setMode("teacher")
+          return
+        }
+        // Reset modal state
+        document.getElementById("pin-input").value = ""
+        document.getElementById("pin-input").type = "password"
+        document.getElementById("pin-eye-btn").textContent = "👁"
+        document.getElementById("pin-error-msg").style.display = "none"
+        document.getElementById("change-pin-panel").style.display = "none"
+        document.getElementById("change-pin-chevron").style.transform = ""
+        document.getElementById("chg-current").value = ""
+        document.getElementById("chg-new").value = ""
+        document.getElementById("chg-confirm").value = ""
+        document.getElementById("chg-msg").style.display = "none"
+        openModal("modal-teacher-pin")
+        setTimeout(() => document.getElementById("pin-input").focus(), 80)
+      }
+
+      function closePinModal() {
+        closeModal("modal-teacher-pin")
+        // Restore button state to match current mode
+        document.getElementById("btn-teacher-mode").className =
+          "btn btn-sm " +
+          (state.mode === "teacher" ? "btn-primary" : "btn-ghost")
+      }
+
+      function togglePinEye() {
+        const inp = document.getElementById("pin-input")
+        const btn = document.getElementById("pin-eye-btn")
+        if (inp.type === "password") {
+          inp.type = "text"
+          btn.textContent = "🙈"
+        } else {
+          inp.type = "password"
+          btn.textContent = "👁"
+        }
+      }
+
+      async function submitPin() {
+        const pin = document.getElementById("pin-input").value.trim()
+        const errEl = document.getElementById("pin-error-msg")
+        if (!pin) {
+          errEl.textContent = "กรุณากรอกรหัสผ่าน"
+          errEl.style.display = "block"
+          return
+        }
+        try {
+          await api("POST", "/auth/verify-pin", { pin })
+          sessionStorage.setItem(SESSION_KEY, "1")
+          closeModal("modal-teacher-pin")
+          toast("🔓 เข้าสู่โหมดครูสำเร็จ", "success")
+          setMode("teacher")
+        } catch (e) {
+          errEl.textContent = "❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่"
+          errEl.style.display = "block"
+          const inp = document.getElementById("pin-input")
+          inp.value = ""
+          inp.focus()
+          inp.style.borderColor = "var(--red)"
+          inp.style.boxShadow = "0 0 0 3px rgba(220,38,38,0.15)"
+          setTimeout(() => {
+            inp.style.borderColor = ""
+            inp.style.boxShadow = ""
+          }, 1600)
+        }
+      }
+
+      function toggleChangePinPanel() {
+        const panel = document.getElementById("change-pin-panel")
+        const chevron = document.getElementById("change-pin-chevron")
+        const open =
+          panel.style.display === "none" || panel.style.display === ""
+        panel.style.display = open ? "block" : "none"
+        chevron.style.transform = open ? "rotate(90deg)" : ""
+        if (open)
+          setTimeout(() => document.getElementById("chg-current").focus(), 60)
+      }
+
+      async function submitChangePin() {
+        const current = document.getElementById("chg-current").value
+        const newPin = document.getElementById("chg-new").value
+        const confirm = document.getElementById("chg-confirm").value
+        const msgEl = document.getElementById("chg-msg")
+
+        const showMsg = (text, isErr) => {
+          msgEl.textContent = text
+          msgEl.style.display = "block"
+          msgEl.style.background = isErr
+            ? "rgba(220,38,38,0.07)"
+            : "rgba(5,150,105,0.08)"
+          msgEl.style.border = isErr
+            ? "1px solid rgba(220,38,38,0.2)"
+            : "1px solid rgba(5,150,105,0.2)"
+          msgEl.style.color = isErr ? "var(--red)" : "var(--green)"
+        }
+
+        if (!current || !newPin || !confirm)
+          return showMsg("กรุณากรอกข้อมูลให้ครบทุกช่อง", true)
+        if (newPin !== confirm) return showMsg("รหัสผ่านใหม่ไม่ตรงกัน", true)
+        if (newPin.length < 3)
+          return showMsg("รหัสผ่านต้องมีอย่างน้อย 3 ตัวอักษร", true)
+
+        try {
+          await api("POST", "/auth/change-pin", {
+            current_pin: current,
+            new_pin: newPin,
+          })
+          showMsg("✅ เปลี่ยนรหัสผ่านสำเร็จแล้ว!", false)
+          sessionStorage.removeItem(SESSION_KEY) // force re-login with new PIN
+          document.getElementById("chg-current").value = ""
+          document.getElementById("chg-new").value = ""
+          document.getElementById("chg-confirm").value = ""
+          setTimeout(() => {
+            msgEl.style.display = "none"
+            document.getElementById("change-pin-panel").style.display = "none"
+            document.getElementById("change-pin-chevron").style.transform = ""
+          }, 2200)
+        } catch (e) {}
+      }
+
+      // =========== INIT ===========
+      async function init() {
+        await loadConfig()
+        await loadAll()
+
+        // ให้เริ่มต้นที่โหมดนักเรียนเสมอ
+        setMode("student")
+        navigate("s-dashboard")
+
+        // ลบเงื่อนไข if (state.config...) ด้านล่างทิ้งไปเลยครับ
+        // มันจะได้ไม่ต้องเด้งขึ้นมาเช็คอะไรอีก
+      }
+
+      async function loadAll() {
+        const teacherId = state.currentTeacher
+          ? state.currentTeacher.id
+          : undefined
+        const [subjects, teachers, students] = await Promise.all([
+          api("GET", "/subjects"),
+          api("GET", "/teachers"),
+          api("GET", "/students"),
+        ])
+        state.subjects = subjects
+        state.teachers = teachers
+        state.students = students
+        const schedPath = teacherId
+          ? `/teacher-schedules?teacher_id=${teacherId}`
+          : "/teacher-schedules"
+        state.schedules = await api("GET", schedPath)
+        subjects.forEach((s, i) => {
+          if (!subjectColorMap[s.id])
+            subjectColorMap[s.id] = COLORS[i % COLORS.length]
+        })
+        if (!state.currentTeacher && teachers.length)
+          state.currentTeacher = teachers[0]
+        updateUserInfo()
+      }
+
+      // =========== MODE ===========
+      function setMode(mode) {
+        state.mode = mode
+        document.getElementById("teacher-nav").style.display =
+          mode === "teacher" ? "block" : "none"
+        document.getElementById("student-nav").style.display =
+          mode === "student" ? "block" : "none"
+        document.getElementById("topbar-role").className =
+          "role-badge " + (mode === "teacher" ? "role-teacher" : "role-student")
+        document.getElementById("topbar-role").textContent =
+          mode === "teacher" ? "👨‍🏫 ครูผู้สอน" : "👨‍🎓 นักเรียน"
+        document.getElementById("btn-teacher-mode").className =
+          "btn btn-sm " + (mode === "teacher" ? "btn-primary" : "btn-ghost")
+        document.getElementById("btn-student-mode").className =
+          "btn btn-sm " + (mode === "student" ? "btn-primary" : "btn-ghost")
+        updateStudentMenuState()
+        if (mode === "teacher") navigate("t-dashboard")
+        else navigate("s-dashboard")
+        updateUserInfo()
+      }
+
+      function updateStudentMenuState() {
+        const hasStudent = !!state.currentStudent
+        ;["nav-s-register", "nav-s-timetable", "nav-s-export"].forEach((id) => {
+          const el = document.getElementById(id)
+          if (el) {
+            if (hasStudent) el.classList.remove("nav-disabled")
+            else el.classList.add("nav-disabled")
+          }
+        })
+      }
+
+      function updateUserInfo() {
+        const el = document.getElementById("current-user-info")
+        if (state.mode === "teacher" && state.currentTeacher) {
+          el.textContent = "👤 " + state.currentTeacher.name
+        } else if (state.mode === "student" && state.currentStudent) {
+          el.textContent =
+            "👤 " +
+            state.currentStudent.name +
+            " (" +
+            state.currentStudent.student_id +
+            ")"
+        } else {
+          el.textContent =
+            state.mode === "student" ? "⚠️ กรุณาเลือกนักเรียน" : ""
+        }
+        updateStudentMenuState()
+      }
+
+      // =========== NAVIGATE ===========
+      function navigate(page) {
+        // Block disabled student pages
+        if (
+          state.mode === "student" &&
+          !state.currentStudent &&
+          ["s-register", "s-timetable", "s-export"].includes(page)
+        ) {
+          toast("กรุณาเลือกนักเรียนก่อน", "error")
+          return
+        }
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"))
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"))
+        const p = document.getElementById("page-" + page)
+        if (p) p.classList.add("active")
+        const titles = {
+          "t-dashboard": "ภาพรวม",
+          "t-subjects": "จัดการรายวิชา",
+          "t-schedule": "ลงตารางสอน",
+          "t-timetable": "ตารางสอน",
+          "t-approve": "อนุมัตินักเรียน",
+          "t-export": "Export ตาราง",
+          "s-dashboard": "หน้าแรก",
+          "s-register": "ลงทะเบียนเรียน",
+          "s-timetable": "ตารางเรียน",
+          "s-export": "Export ตาราง",
+        }
+        document.getElementById("topbar-title").textContent = titles[page] || ""
+        document.querySelectorAll(".nav-item").forEach((n) => {
+          if (
+            n.getAttribute("onclick") &&
+            n.getAttribute("onclick").includes("'" + page + "'")
+          )
+            n.classList.add("active")
+        })
+        if (page === "t-dashboard") renderTeacherDashboard()
+        else if (page === "t-subjects") renderSubjectsTable()
+        else if (page === "t-schedule") renderSchedulePage()
+        else if (page === "t-timetable") renderTeacherTimetable()
+        else if (page === "t-approve") renderApprovalPage()
+        else if (page === "t-export") renderTeacherExportPage()
+        else if (page === "s-dashboard") renderStudentDashboard()
+        else if (page === "s-register") renderStudentRegister()
+        else if (page === "s-timetable") renderStudentTimetable()
+        else if (page === "s-export") renderStudentExportPage()
+      }
+
+      // =========== TEACHER DASHBOARD ===========
+      async function renderTeacherDashboard() {
+        await loadAll()
+        const teacherId = state.currentTeacher ? state.currentTeacher.id : ""
+        const unregistered = await api("GET", "/teacher-schedules/unregistered")
+        // const unregistered = await api(
+        //   "GET",
+        //   "/teacher-schedules/unregistered" +
+        //     (teacherId ? "?teacher_id=" + teacherId : ""),
+        // )
+        const scheduled = state.subjects.length - unregistered.length
+        document.getElementById("stat-subjects").textContent =
+          state.subjects.length
+        document.getElementById("stat-scheduled").textContent = scheduled
+        document.getElementById("stat-unscheduled").textContent =
+          unregistered.length
+        document.getElementById("stat-students").textContent =
+          state.students.length
+
+        // pending requests
+        if (state.currentTeacher) {
+          const reqs = await api(
+            "GET",
+            "/enrollment-requests/teacher/" + state.currentTeacher.id,
+          )
+          const pendingCount = reqs.filter((r) => r.status === "pending").length
+          document.getElementById("stat-pending").textContent = pendingCount
+          const badge = document.getElementById("pending-badge")
+          if (pendingCount > 0) {
+            badge.textContent = pendingCount
+            badge.style.display = ""
+          } else badge.style.display = "none"
+        }
+
+        const el = document.getElementById("unregistered-subjects-list")
+        if (!unregistered.length) {
+          el.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">🎉</div>ลงตารางสอนครบทุกวิชาแล้ว!</div>'
+        } else {
+          el.innerHTML = unregistered
+            .map(
+              (s) => `
+      <div class="drag-item" style="margin-bottom:8px;">
+        <span class="drag-handle">⚠️</span>
+        <div><div class="subject-code">${s.code}</div><div class="subject-name">${s.name}</div></div>
+        <div style="margin-left:auto; display:flex; gap:6px; align-items:center;">
+          <span class="badge badge-orange">${s.theory_hours}ท. ${s.practice_hours}ป. ${s.credits}น.</span>
+          <button class="btn btn-primary btn-sm" onclick="navigate('t-schedule')">ลงตาราง</button>
+        </div>
+      </div>`,
+            )
+            .join("")
+        }
+      }
+
+      // =========== SUBJECTS TABLE ===========
+      async function renderSubjectsTable() {
+        await loadAll()
+        const scheduledIds = new Set(state.schedules.map((s) => s.subject_id))
+        // Fetch global subject→teacher map (all teachers)
+        const schedMap = await api("GET", "/subjects/scheduled-map")
+        const tbody = document.getElementById("subjects-tbody")
+        state.selectedSubjectIds = new Set()
+        updateSubjectBulkBar()
+        tbody.innerHTML =
+          state.subjects
+            .map((s) => {
+              const ownerInfo = schedMap[s.id]
+              const isScheduled = !!ownerInfo
+              const isOwnTeacher =
+                ownerInfo &&
+                state.currentTeacher &&
+                ownerInfo.teacher_id === state.currentTeacher.id
+              const lockTitle = isScheduled
+                ? `บรรจุโดย ${ownerInfo.teacher_name} แล้ว — ไม่สามารถแก้ไขได้`
+                : ""
+              return `
+    <tr>
+      <td><input type="checkbox" class="sub-cb" value="${s.id}" onchange="toggleSubjectSelect('${s.id}', this.checked)"></td>
+      <td><span class="badge badge-blue">${s.code}</span></td>
+      <td>
+        ${s.name}
+        ${isScheduled ? `<span class="badge badge-orange" style="margin-left:6px;" title="${lockTitle}">🔒 ${ownerInfo.teacher_name}</span>` : ""}
+      </td>
+      <td>${s.theory_hours}</td><td>${s.practice_hours}</td><td>${s.credits}</td>
+      <td>${s.total_hours} ชม.</td>
+      <td>${
+        isScheduled
+          ? `<span class="badge badge-green">✓ ลงตารางแล้ว</span>`
+          : '<span class="badge badge-red">⚠ ยังไม่ได้ลง</span>'
+      }</td>
+      <td>
+        ${
+          isScheduled
+            ? `<button class="btn btn-ghost btn-sm" disabled title="ลงตารางสอนแล้ว — ไม่สามารถแก้ไขได้" style="opacity:.35; cursor:not-allowed;">🔒 แก้ไขไม่ได้</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="editSubject('${s.id}')">✏️</button>`
+        }
+        <button class="btn btn-danger btn-sm" onclick="deleteSubject('${s.id}')">🗑</button>
+      </td>
+    </tr>`
+            })
+            .join("") ||
+          '<tr><td colspan="9" class="empty-state">ยังไม่มีรายวิชา</td></tr>'
+      }
+
+      function toggleSubjectSelect(id, checked) {
+        if (checked) state.selectedSubjectIds.add(id)
+        else state.selectedSubjectIds.delete(id)
+        updateSubjectBulkBar()
+      }
+
+      function toggleSelectAllSubjects(checked) {
+        document.querySelectorAll(".sub-cb").forEach((cb) => {
+          cb.checked = checked
+          if (checked) state.selectedSubjectIds.add(cb.value)
+          else state.selectedSubjectIds.delete(cb.value)
+        })
+        updateSubjectBulkBar()
+      }
+
+      function updateSubjectBulkBar() {
+        const bar = document.getElementById("subject-bulk-bar")
+        const count = state.selectedSubjectIds.size
+        document.getElementById("subject-selected-count").textContent =
+          `เลือก ${count} รายการ`
+        bar.classList.toggle("visible", count > 0)
+      }
+
+      function clearSubjectSelection() {
+        state.selectedSubjectIds = new Set()
+        document
+          .querySelectorAll(".sub-cb")
+          .forEach((cb) => (cb.checked = false))
+        const allCb = document.getElementById("select-all-subjects")
+        if (allCb) allCb.checked = false
+        updateSubjectBulkBar()
+      }
+
+      async function deleteSelectedSubjects() {
+        const ids = [...state.selectedSubjectIds]
+        if (!ids.length) return
+        await confirmDeleteSubjects(ids)
+      }
+
+      async function deleteAllSubjects() {
+        if (!state.subjects.length) return toast("ไม่มีรายวิชา", "error")
+        const ids = state.subjects.map((s) => s.id)
+        await confirmDeleteSubjects(ids)
+      }
+
+      async function confirmDeleteSubjects(ids) {
+        // Check which have registrations
+        const regMap = await api("POST", "/subjects/check-registrations", {
+          ids,
+        })
+        const withReg = ids.filter((id) => regMap[id])
+        const noReg = ids.filter((id) => !regMap[id])
+        let msg = `จะลบ <strong>${ids.length} วิชา</strong>`
+        if (withReg.length > 0) {
+          const names = withReg.map(
+            (id) => state.subjects.find((s) => s.id === id)?.name || id,
+          )
+          msg += `<br><br>⚠️ วิชาต่อไปนี้มีนักเรียนลงทะเบียนอยู่ และข้อมูลการลงทะเบียนจะถูกลบด้วย:<br>
+      <ul style="margin-top:8px; padding-left:20px; color:var(--red);">${names.map((n) => `<li>${n}</li>`).join("")}</ul>`
+        }
+        msg += "<br><br>ต้องการดำเนินการต่อหรือไม่?"
+        showConfirmModal("⚠️ ยืนยันการลบรายวิชา", msg, async () => {
+          try {
+            await api("POST", "/subjects/bulk-delete", { ids })
+            toast(`ลบ ${ids.length} วิชาแล้ว`, "success")
+            await loadAll()
+            renderSubjectsTable()
+          } catch (e) {}
+        })
+      }
+
+      // =========== ADD/EDIT SUBJECT MODAL ===========
+      function showAddSubjectModal() {
+        document.getElementById("edit-subject-id").value = ""
+        document.getElementById("modal-subject-title").textContent =
+          "➕ เพิ่มรายวิชา"
+        ;["sub-code", "sub-name"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        )
+        ;["sub-theory", "sub-practice", "sub-credits"].forEach(
+          (id) => (document.getElementById(id).value = "0"),
+        )
+        openModal("modal-add-subject")
+      }
+
+      function editSubject(id) {
+        const s = state.subjects.find((x) => x.id === id)
+        if (!s) return
+        document.getElementById("edit-subject-id").value = id
+        document.getElementById("modal-subject-title").textContent =
+          "✏️ แก้ไขรายวิชา"
+        document.getElementById("sub-code").value = s.code
+        document.getElementById("sub-name").value = s.name
+        document.getElementById("sub-theory").value = s.theory_hours
+        document.getElementById("sub-practice").value = s.practice_hours
+        document.getElementById("sub-credits").value = s.credits
+        openModal("modal-add-subject")
+      }
+
+      async function saveSubject() {
+        const id = document.getElementById("edit-subject-id").value
+        const body = {
+          code: document.getElementById("sub-code").value.trim(),
+          name: document.getElementById("sub-name").value.trim(),
+          theory_hours: +document.getElementById("sub-theory").value,
+          practice_hours: +document.getElementById("sub-practice").value,
+          credits: +document.getElementById("sub-credits").value,
+        }
+        if (!body.code || !body.name)
+          return toast("กรุณากรอกรหัสและชื่อวิชา", "error")
+        try {
+          if (id) await api("PUT", "/subjects/" + id, body)
+          else await api("POST", "/subjects", body)
+          toast(id ? "แก้ไขวิชาสำเร็จ" : "เพิ่มวิชาสำเร็จ", "success")
+          closeModal("modal-add-subject")
+          await loadAll()
+          renderSubjectsTable()
+        } catch (e) {}
+      }
+
+      async function deleteSubject(id) {
+        const s = state.subjects.find((x) => x.id === id)
+        await confirmDeleteSubjects([id])
+      }
+
+      // =========== SCHEDULE PAGE ===========
+      async function renderSchedulePage() {
+        await loadAll()
+        const teacherId = state.currentTeacher ? state.currentTeacher.id : ""
+
+        // แผนที่วิชาว่าใครเป็นเจ้าของบ้าง (ดึงจากระบบหลังบ้าน)
+        const schedMap = await api("GET", "/subjects/scheduled-map")
+
+        // 1. คำนวณชั่วโมงที่ครูคนนี้จัดลงตารางไปแล้วในแต่ละวิชา
+        const myHoursMap = {}
+        state.schedules.forEach((s) => {
+          if (!myHoursMap[s.subject_id]) myHoursMap[s.subject_id] = 0
+          // นับจำนวนคาบที่ลงไป (คาบสิ้นสุด - คาบเริ่มต้น + 1)
+          myHoursMap[s.subject_id] += s.period_end - s.period_start + 1
+        })
+
+        // จัดกลุ่มวิชาสำหรับแสดงผล
+        const availableList = []
+        const incompleteList = []
+        const otherTakenList = []
+        const dropdownOptions = []
+
+        // 2. แยกประเภทวิชาทั้งหมด
+        state.subjects.forEach((s) => {
+          const totalHours = s.total_hours || s.theory_hours + s.practice_hours
+          const ownerInfo = schedMap[s.id]
+
+          if (!ownerInfo) {
+            // กรณียังไม่มีใครลงตารางเลย
+            availableList.push(s)
+            dropdownOptions.push(
+              `<option value="${s.id}">${s.code} - ${s.name}</option>`,
+            )
+          } else if (ownerInfo.teacher_id !== teacherId) {
+            // กรณีครูคนอื่นเอาไปลงตารางแล้ว
+            otherTakenList.push({ ...s, ownerName: ownerInfo.teacher_name })
+            dropdownOptions.push(
+              `<option value="${s.id}" disabled>${s.code} - ${s.name} [🔒 ${ownerInfo.teacher_name}]</option>`,
+            )
+          } else {
+            // กรณีเป็นวิชาของครูคนนี้ (กำลังล็อกอินอยู่)
+            const myHours = myHoursMap[s.id] || 0
+            if (myHours < totalHours) {
+              // ลงตารางแล้วแต่ "ยังไม่ครบ"
+              incompleteList.push({
+                ...s,
+                scheduledHours: myHours,
+                total: totalHours,
+              })
+              dropdownOptions.push(
+                `<option value="${s.id}">${s.code} - ${s.name} (ขาด ${totalHours - myHours} ชม.)</option>`,
+              )
+            } else {
+              // ลงตาราง "ครบแล้ว"
+              dropdownOptions.push(
+                `<option value="${s.id}" disabled style="color:var(--green)">${s.code} - ${s.name} [🔒 ลงครบแล้ว]</option>`,
+              )
+            }
+          }
+        })
+
+        // 3. วาดรายการช่องซ้ายมือ (ลากวาง)
+        const dragList = document.getElementById("unscheduled-drag-list")
+        let html = ""
+        if (
+          !availableList.length &&
+          !incompleteList.length &&
+          !otherTakenList.length
+        ) {
+          html =
+            '<div class="empty-state" style="padding:20px"><div class="empty-icon">✅</div>ลงตารางครบหมดทุกวิชาแล้ว</div>'
+        } else {
+          // ส่วนที่ 1: วิชาที่ยังลงไม่ครบ (เน้นสีส้ม)
+          if (incompleteList.length) {
+            html += `<div style="font-size:10px; color:var(--orange); margin:0 0 6px; font-weight:600; letter-spacing:.5px;">⚠️ ลงตารางสอนยังไม่ครบ</div>`
+            html += incompleteList
+              .map(
+                (s) => `
+              <div class="drag-item" style="border-left: 3px solid var(--orange);" draggable="true" ondragstart="onDragStart(event,'${s.id}')" onclick="selectSubjectForSchedule('${s.id}')">
+                <span class="drag-handle">⠿</span>
+                <div style="flex:1">
+                  <div class="subject-code">${s.code}</div>
+                  <div class="subject-name">${s.name}</div>
+                  <div style="font-size:10px; color:var(--orange)">ต้องการ ${s.total} ชม. / ลงแล้ว ${s.scheduledHours} ชม. <b>(ขาด ${s.total - s.scheduledHours} ชม.)</b></div>
+                </div>
+              </div>`,
+              )
+              .join("")
+          }
+          // ส่วนที่ 2: วิชาที่ว่างอยู่
+          if (availableList.length) {
+            html += `<div style="font-size:10px; color:var(--text3); margin:12px 0 6px; font-weight:600; letter-spacing:.5px;">📌 วิชาที่ยังไม่ได้ลงตาราง</div>`
+            html += availableList
+              .map(
+                (s) => `
+              <div class="drag-item" draggable="true" ondragstart="onDragStart(event,'${s.id}')" onclick="selectSubjectForSchedule('${s.id}')">
+                <span class="drag-handle">⠿</span>
+                <div style="flex:1">
+                  <div class="subject-code">${s.code}</div>
+                  <div class="subject-name">${s.name}</div>
+                  <div style="font-size:10px; color:var(--text3)">ท.${s.theory_hours} ป.${s.practice_hours} ${s.credits}น. รวม ${s.total_hours}ชม.</div>
+                </div>
+              </div>`,
+              )
+              .join("")
+          }
+          // ส่วนที่ 3: วิชาของครูท่านอื่น
+          if (otherTakenList.length) {
+            html += `<div style="font-size:10px; color:var(--text3); margin:12px 0 6px; font-weight:600; letter-spacing:.5px; text-transform:uppercase;">🔒 บรรจุโดยครูท่านอื่นแล้ว</div>`
+            html += otherTakenList
+              .map(
+                (s) => `
+              <div class="drag-item" style="opacity:.4; cursor:not-allowed;" title="บรรจุโดย ${s.ownerName} แล้ว">
+                <span>🔒</span>
+                <div style="flex:1">
+                  <div class="subject-code">${s.code}</div>
+                  <div class="subject-name">${s.name}</div>
+                  <div style="font-size:10px; color:var(--text3)">👨‍🏫 ${s.ownerName}</div>
+                </div>
+                <span class="badge badge-orange">ไม่ว่าง</span>
+              </div>`,
+              )
+              .join("")
+          }
+        }
+        dragList.innerHTML = html
+
+        // 4. อัปเดต Dropdown เลือกวิชา
+        const sel = document.getElementById("sched-subject")
+        sel.innerHTML =
+          '<option value="">-- เลือกวิชา --</option>' + dropdownOptions.join("")
+
+        // 5. อัปเดต Dropdown เลือกครู
+        const tsel = document.getElementById("sched-teacher")
+        tsel.innerHTML =
+          '<option value="">-- เลือกครู --</option>' +
+          state.teachers
+            .map((t) => `<option value="${t.id}">${t.name}</option>`)
+            .join("")
+        if (state.currentTeacher) tsel.value = state.currentTeacher.id
+
+        renderSchedulesTable()
+        renderSchedDaySlots()
+      }
+
+      function selectSubjectForSchedule(id) {
+        document.getElementById("sched-subject").value = id
+        const s = state.subjects.find((x) => x.id === id)
+        if (s) toast(`เลือกวิชา: ${s.name}`, "success")
+      }
+
+      function onDragStart(e, id) {
+        state.draggingSubjectId = id
+        e.dataTransfer.effectAllowed = "move"
+        document.getElementById("sched-subject").value = id
+      }
+
+      // =========== MULTI-DAY SCHEDULE SLOTS ===========
+      // state.schedDaySlots = [{day, periodStart, periodEnd, room}, ...]
+
+      function buildPeriodPickerHTML(slotIdx, occupiedSet) {
+        const TIMES = [
+          "08:20",
+          "09:20",
+          "10:20",
+          "11:20",
+          "",
+          "13:20",
+          "14:20",
+          "15:20",
+          "16:20",
+          "17:20",
+          "18:20",
+        ]
+        const occ = occupiedSet || new Set()
+        let html =
+          '<div class="period-picker" style="margin-top:6px;" data-slot-picker="' +
+          slotIdx +
+          '">'
+        for (let p = 1; p <= 11; p++) {
+          if (p === 5) {
+            html +=
+              '<div class="period-btn break"><div>☕</div><small style="font-size:8px">พัก</small></div>'
+          } else {
+            const time = TIMES[p - 1]
+            if (occ.has(p)) {
+              html += `<div class="period-btn" data-period="${p}" style="background:rgba(220,38,38,0.1);border-color:rgba(220,38,38,0.3);color:#b91c1c;cursor:not-allowed;" title="คาบนี้ถูกใช้แล้ว"><div>${p}</div><small style="font-size:8px">${time}</small><small style="font-size:7px;color:#b91c1c">🔒ไม่ว่าง</small></div>`
+            } else {
+              html += `<div class="period-btn" data-period="${p}" onclick="toggleSlotPeriod(${slotIdx},${p})"><div>${p}</div><small style="font-size:8px">${time}</small></div>`
+            }
+          }
+        }
+        html += "</div>"
+        return html
+      }
+
+      async function renderSchedDaySlots() {
+        const cont = document.getElementById("sched-day-slots")
+        if (!cont) return
+        const subjectId = document.getElementById("sched-subject").value
+        const teacherId = document.getElementById("sched-teacher")
+          ? document.getElementById("sched-teacher").value
+          : ""
+        const subj = state.subjects.find((s) => s.id === subjectId)
+        const totalHours = subj ? subj.theory_hours + subj.practice_hours : 0
+
+        // 1. คำนวณชั่วโมงที่เคยลงตารางไปแล้วของวิชานี้ (ดึงจากฐานข้อมูล)
+        let prevHours = 0
+        if (subjectId && teacherId) {
+          state.schedules.forEach((s) => {
+            if (s.subject_id === subjectId && s.teacher_id === teacherId) {
+              prevHours += s.period_end - s.period_start + 1
+            }
+          })
+        }
+
+        // 2. คำนวณชั่วโมงที่กำลังเลือกในฟอร์มปัจจุบัน
+        const formHours = state.schedDaySlots.reduce((sum, sl) => {
+          if (sl.periodStart && sl.periodEnd)
+            return sum + (sl.periodEnd - sl.periodStart + 1)
+          return sum
+        }, 0)
+
+        // 3. เอาชั่วโมงเก่า + ชั่วโมงใหม่
+        const totalUsed = prevHours + formHours
+
+        document.getElementById("sched-hours-info").textContent = totalHours
+          ? `(รวม ${totalUsed}/${totalHours} ชม.)`
+          : ""
+
+        const totalLbl = document.getElementById("sched-total-label")
+        if (totalHours && (prevHours > 0 || state.schedDaySlots.length)) {
+          totalLbl.style.display = ""
+          const diff = totalHours - totalUsed
+          if (diff === 0)
+            totalLbl.innerHTML = `<span style="color:var(--green)">✓ ครบ ${totalHours} ชั่วโมงแล้ว</span>`
+          else if (diff > 0)
+            totalLbl.innerHTML = `<span style="color:var(--orange)">⚠ ยังขาดอีก ${diff} ชั่วโมง (ลงแล้ว ${prevHours} + เลือกใหม่ ${formHours} = ${totalUsed}/${totalHours})</span>`
+          else
+            totalLbl.innerHTML = `<span style="color:var(--red)">⚠ เกิน ${Math.abs(diff)} ชั่วโมง (ลงแล้ว ${prevHours} + เลือกใหม่ ${formHours} = ${totalUsed}/${totalHours})</span>`
+        } else {
+          totalLbl.style.display = "none"
+        }
+
+        // Build occupied-period map per day for chosen teacher
+        // key = day, value = Set of occupied period numbers
+        const occupiedByDay = {}
+        DAYS.forEach((d) => (occupiedByDay[d] = new Set()))
+        const refScheds =
+          teacherId && teacherId === state.currentTeacher?.id
+            ? state.schedules
+            : teacherId
+              ? await api(
+                  "GET",
+                  "/teacher-schedules?teacher_id=" + teacherId,
+                ).catch(() => [])
+              : []
+        refScheds.forEach((s) => {
+          if (occupiedByDay[s.day]) {
+            for (let p = s.period_start; p <= s.period_end; p++)
+              occupiedByDay[s.day].add(p)
+          }
+        })
+
+        cont.innerHTML = state.schedDaySlots
+          .map((sl, idx) => {
+            const pLabel =
+              sl.periodStart && sl.periodEnd
+                ? `คาบ ${sl.periodStart}-${sl.periodEnd} (${PERIOD_TIMES[sl.periodStart]}–${PERIOD_END[sl.periodEnd]})`
+                : "ยังไม่ได้เลือกคาบ"
+            const occSet = occupiedByDay[sl.day] || new Set()
+            return `<div style="background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; position:relative;">
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+              <select onchange="updateSlot(${idx},'day',this.value)" style="flex:1; min-width:100px;">
+                ${["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"].map((d) => `<option ${sl.day === d ? "selected" : ""}>${d}</option>`).join("")}
+              </select>
+              <input placeholder="ห้อง เช่น ชย102" value="${sl.room || ""}" oninput="updateSlot(${idx},'room',this.value)" style="width:110px;" />
+              ${state.schedDaySlots.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeSchedSlot(${idx})">🗑</button>` : ""}
+            </div>
+            <div style="font-size:11px; color:var(--text3); margin-bottom:4px;">คาบ 1-4 = 08:20-12:20 | คาบ 6-11 = 14:20-20:20 &nbsp;·&nbsp; <span style="color:#b91c1c">🔒 = คาบไม่ว่าง</span></div>
+            ${buildPeriodPickerHTML(idx, occSet)}
+            <div style="font-size:11px; color:var(--accent2); margin-top:6px;" id="slot-label-${idx}">${pLabel}</div>
+          </div>`
+          })
+          .join("")
+        // Re-render selected state (skip occupied buttons)
+        state.schedDaySlots.forEach((sl, idx) => {
+          if (!sl.periodStart || !sl.periodEnd) return
+          const picker = cont.querySelector(`[data-slot-picker="${idx}"]`)
+          if (!picker) return
+          for (let p = sl.periodStart; p <= sl.periodEnd; p++) {
+            const btn = picker.querySelector(`[data-period="${p}"][onclick]`)
+            if (btn) btn.classList.add("selected")
+          }
+        })
+      }
+
+      function updateSlot(idx, key, val) {
+        if (key === "day") {
+          const duplicate = state.schedDaySlots.some(
+            (s, i) => i !== idx && s.day === val,
+          )
+          if (duplicate) {
+            toast(`วัน${val}มีอยู่แล้ว ไม่สามารถเลือกซ้ำได้`, "error")
+            // Reset select back to current value
+            const cont = document.getElementById("sched-day-slots")
+            if (cont) {
+              const selects = cont.querySelectorAll("select")
+              if (selects[idx])
+                selects[idx].value = state.schedDaySlots[idx].day
+            }
+            return
+          }
+        }
+        state.schedDaySlots[idx][key] = val
+        renderSchedDaySlots()
+      }
+
+      function toggleSlotPeriod(slotIdx, p) {
+        const sl = state.schedDaySlots[slotIdx]
+        if (!sl.periodStart || !sl.periodEnd) {
+          sl.periodStart = p
+          sl.periodEnd = p
+        } else if (sl.periodStart === p && sl.periodEnd === p) {
+          sl.periodStart = null
+          sl.periodEnd = null
+        } else {
+          const newStart = Math.min(sl.periodStart, p)
+          const newEnd = Math.max(sl.periodEnd, p)
+          if (p >= sl.periodStart && p <= sl.periodEnd) {
+            if (p - sl.periodStart < sl.periodEnd - p) sl.periodStart = p + 1
+            else sl.periodEnd = p - 1
+            if (sl.periodStart > sl.periodEnd) {
+              sl.periodStart = null
+              sl.periodEnd = null
+            }
+          } else {
+            sl.periodStart = newStart
+            sl.periodEnd = newEnd
+          }
+        }
+        renderSchedDaySlots() // async — fire and forget OK
+      }
+
+      function addSchedDaySlot() {
+        const usedDays = new Set(state.schedDaySlots.map((s) => s.day))
+        const ALL_DAYS = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"]
+        if (usedDays.size >= ALL_DAYS.length) {
+          toast("เพิ่มช่วงวันครบทุกวันแล้ว (5 วัน)", "error")
+          return
+        }
+        const nextDay = ALL_DAYS.find((d) => !usedDays.has(d)) || "จันทร์"
+        state.schedDaySlots.push({
+          day: nextDay,
+          periodStart: null,
+          periodEnd: null,
+          room: "",
+        })
+        renderSchedDaySlots()
+      }
+
+      function removeSchedSlot(idx) {
+        state.schedDaySlots.splice(idx, 1)
+        renderSchedDaySlots()
+      }
+
+      function onSchedSubjectChange() {
+        renderSchedDaySlots()
+      }
+
+      function togglePeriod(p) {
+        // Legacy: kept for compatibility but not used
+      }
+
+      async function addSchedule() {
+        const subjectId = document.getElementById("sched-subject").value
+        const teacherId = document.getElementById("sched-teacher").value
+        const group = document.getElementById("sched-group").value
+        if (!subjectId || !teacherId)
+          return toast("กรุณาเลือกวิชาและครู", "error")
+        const subj = state.subjects.find((s) => s.id === subjectId)
+        const totalHours = subj ? subj.theory_hours + subj.practice_hours : 0
+
+        // คำนวณชั่วโมงที่เคยลงไปแล้วของวิชานี้
+        let prevHours = 0
+        state.schedules.forEach((s) => {
+          if (s.subject_id === subjectId && s.teacher_id === teacherId) {
+            prevHours += s.period_end - s.period_start + 1
+          }
+        })
+
+        const slots = state.schedDaySlots.filter(
+          (sl) => sl.periodStart && sl.periodEnd,
+        )
+        if (!slots.length)
+          return toast("กรุณาเลือกคาบเรียนอย่างน้อย 1 ช่วง", "error")
+
+        // คำนวณชั่วโมงที่เลือกในฟอร์มปัจจุบัน
+        const formHours = slots.reduce(
+          (sum, sl) => sum + (sl.periodEnd - sl.periodStart + 1),
+          0,
+        )
+
+        // เอาของเก่าบวกของใหม่
+        const totalUsed = prevHours + formHours
+
+        if (totalHours > 0 && totalUsed !== totalHours)
+          return toast(
+            `จำนวนชั่วโมงรวมต้องครบ ${totalHours} ชม. พอดี (ของเดิม ${prevHours} + เลือกใหม่ ${formHours} = ปัจจุบัน ${totalUsed} ชม.)`,
+            "error",
+          )
+
+        try {
+          for (const sl of slots) {
+            await api("POST", "/teacher-schedules", {
+              teacher_id: teacherId,
+              subject_id: subjectId,
+              day: sl.day,
+              period_start: sl.periodStart,
+              period_end: sl.periodEnd,
+              room: sl.room || "",
+              group_code: group,
+            })
+          }
+          toast(`บันทึกตารางสอน ${slots.length} ช่วงแล้ว ✅`, "success")
+          state.schedDaySlots = [
+            { day: "จันทร์", periodStart: null, periodEnd: null, room: "" },
+          ]
+          await loadAll()
+          renderSchedulePage()
+        } catch (e) {}
+      }
+
+      function renderSchedulesTable() {
+        const tbody = document.getElementById("schedules-tbody")
+        state.selectedSchedIds = new Set()
+        updateSchedBulkBar()
+        if (!state.schedules.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="9" class="empty-state">ยังไม่มีตารางสอน</td></tr>'
+          return
+        }
+        const sorted = [...state.schedules].sort(
+          (a, b) =>
+            DAYS.indexOf(a.day) - DAYS.indexOf(b.day) ||
+            a.period_start - b.period_start,
+        )
+        tbody.innerHTML = sorted
+          .map(
+            (s) => `
+    <tr>
+      <td><input type="checkbox" class="sched-cb" value="${s.id}" onchange="toggleSchedSelect('${s.id}', this.checked)"></td>
+      <td>${s.day}</td>
+      <td>คาบ ${s.period_start}${s.period_end > s.period_start ? "-" + s.period_end : ""}</td>
+      <td>${PERIOD_TIMES[s.period_start]}-${PERIOD_END[s.period_end]}</td>
+      <td><span class="badge badge-blue">${s.subject_code}</span></td>
+      <td>${s.subject_name}</td>
+      <td>${s.room || "-"}</td>
+      <td><small>${s.group_code || "-"}</small></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editSchedule('${s.id}')" title="แก้ไขเวลา/วัน/ห้อง">✏️ แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">🗑 ยกเลิก</button>
+      </td>
+    </tr>`,
+          )
+          .join("")
+      }
+
+      function toggleSchedSelect(id, checked) {
+        if (checked) state.selectedSchedIds.add(id)
+        else state.selectedSchedIds.delete(id)
+        updateSchedBulkBar()
+      }
+
+      function toggleSelectAllScheds(checked) {
+        document.querySelectorAll(".sched-cb").forEach((cb) => {
+          cb.checked = checked
+          if (checked) state.selectedSchedIds.add(cb.value)
+          else state.selectedSchedIds.delete(cb.value)
+        })
+        updateSchedBulkBar()
+      }
+
+      function updateSchedBulkBar() {
+        const bar = document.getElementById("sched-bulk-bar")
+        const count = state.selectedSchedIds.size
+        document.getElementById("sched-selected-count").textContent =
+          `เลือก ${count} รายการ`
+        bar.classList.toggle("visible", count > 0)
+      }
+
+      function clearSchedSelection() {
+        state.selectedSchedIds = new Set()
+        document
+          .querySelectorAll(".sched-cb")
+          .forEach((cb) => (cb.checked = false))
+        const allCb = document.getElementById("select-all-scheds")
+        if (allCb) allCb.checked = false
+        updateSchedBulkBar()
+      }
+
+      async function deleteSelectedSchedules() {
+        const ids = [...state.selectedSchedIds]
+        if (!ids.length) return
+        showConfirmModal(
+          "⚠️ ยืนยันยกเลิกตารางสอน",
+          `ยกเลิก <strong>${ids.length} รายการ</strong>?<br>ข้อมูลการลงทะเบียนนักเรียนในคาบเหล่านี้จะถูกลบด้วย`,
+          async () => {
+            await api("POST", "/teacher-schedules/bulk-delete", { ids })
+            toast(`ยกเลิก ${ids.length} รายการแล้ว`, "success")
+            await loadAll()
+            await renderSchedulePage()
+          },
+        )
+      }
+
+      async function deleteAllSchedules() {
+        if (!state.currentTeacher) return toast("กรุณาเลือกครูก่อน", "error")
+        if (!state.schedules.length) return toast("ไม่มีตารางสอน", "error")
+        showConfirmModal(
+          "⚠️ ยืนยันยกเลิกตารางสอนทั้งหมด",
+          `ยกเลิกตารางสอนทั้งหมด <strong>${state.schedules.length} รายการ</strong> ของ ${state.currentTeacher.name}?<br>ข้อมูลการลงทะเบียนนักเรียนทั้งหมดจะถูกลบด้วย`,
+          async () => {
+            await api(
+              "DELETE",
+              "/teacher-schedules/all/" + state.currentTeacher.id,
+            )
+            toast("ยกเลิกตารางสอนทั้งหมดแล้ว", "success")
+            await loadAll()
+            await renderSchedulePage()
+          },
+        )
+      }
+
+      async function deleteSchedule(id) {
+        showConfirmModal(
+          "⚠️ ยืนยันยกเลิกตารางสอน",
+          "ยกเลิกตารางสอนนี้? การลงทะเบียนนักเรียนในคาบนี้จะถูกลบด้วย",
+          async () => {
+            await api("DELETE", "/teacher-schedules/" + id)
+            toast("ยกเลิกตารางสอนแล้ว", "success")
+            await loadAll()
+            await renderSchedulePage()
+          },
+        )
+      }
+
+      // =========== EDIT SCHEDULE MODAL ===========
+      function editSchedule(id) {
+        const s = state.schedules.find((x) => x.id === id)
+        if (!s) return
+        document.getElementById("edit-sched-id").value = id
+        document.getElementById("edit-sched-subject-info").textContent =
+          `${s.subject_code} — ${s.subject_name} (รวม ${s.theory_hours + s.practice_hours} ชม.)`
+        document.getElementById("edit-sched-total-hours").textContent =
+          s.theory_hours + s.practice_hours
+        document.getElementById("edit-sched-day").value = s.day
+        document.getElementById("edit-sched-room").value = s.room || ""
+        document.getElementById("edit-sched-group").value = s.group_code || ""
+        // Store context for conflict check
+        state._editId = id
+        state._editTeacherId = s.teacher_id
+        // Pre-select periods
+        state.editSchedPeriods = []
+        for (let p = s.period_start; p <= s.period_end; p++)
+          state.editSchedPeriods.push(p)
+        renderEditPeriods()
+        openModal("modal-edit-schedule")
+      }
+
+      function renderEditPeriods() {
+        const editId = state._editId
+        const teacherId = state._editTeacherId
+        const day = document.getElementById("edit-sched-day")?.value
+        // Build occupied set: other schedules of same teacher on same day
+        const occupied = new Set()
+        state.schedules.forEach((s) => {
+          if (s.teacher_id === teacherId && s.day === day && s.id !== editId) {
+            for (let p = s.period_start; p <= s.period_end; p++) occupied.add(p)
+          }
+        })
+        document
+          .querySelectorAll(".edit-period-btn[data-period]")
+          .forEach((btn) => {
+            const p = +btn.dataset.period
+            const isOcc = occupied.has(p)
+            const isSel = state.editSchedPeriods.includes(p)
+            // Reset inline styles
+            btn.removeAttribute("style")
+            btn.classList.remove("selected")
+            if (isOcc) {
+              btn.style.cssText =
+                "background:rgba(220,38,38,0.1);border-color:rgba(220,38,38,0.3);color:#b91c1c;cursor:not-allowed;"
+              btn.title = "คาบนี้ถูกใช้แล้ว — ไม่สามารถเลือกได้"
+            } else {
+              btn.style.cursor = "pointer"
+              btn.title = ""
+              if (isSel) btn.classList.add("selected")
+            }
+          })
+        updateEditPeriodLabel()
+      }
+
+      function toggleEditPeriod(p) {
+        // Block occupied periods
+        const editId = state._editId
+        const teacherId = state._editTeacherId
+        const day = document.getElementById("edit-sched-day")?.value
+        const isOcc = state.schedules.some(
+          (s) =>
+            s.teacher_id === teacherId &&
+            s.day === day &&
+            s.id !== editId &&
+            p >= s.period_start &&
+            p <= s.period_end,
+        )
+        if (isOcc) {
+          toast("คาบนี้ถูกใช้งานแล้ว", "error")
+          return
+        }
+        const idx = state.editSchedPeriods.indexOf(p)
+        if (idx >= 0) state.editSchedPeriods.splice(idx, 1)
+        else state.editSchedPeriods.push(p)
+        state.editSchedPeriods.sort((a, b) => a - b)
+        renderEditPeriods()
+      }
+
+      function updateEditPeriodLabel() {
+        const lbl = document.getElementById("edit-periods-label")
+        if (state.editSchedPeriods.length) {
+          const min = Math.min(...state.editSchedPeriods),
+            max = Math.max(...state.editSchedPeriods)
+          const count = max - min + 1
+          lbl.innerHTML = `<span style="color:var(--green)">✓ คาบ ${min}–${max} (${PERIOD_TIMES[min]}–${PERIOD_END[max]}) รวม ${count} คาบ</span>`
+        } else {
+          lbl.innerHTML = `<span style="color:var(--text3)">ยังไม่ได้เลือกคาบ</span>`
+        }
+      }
+
+      async function saveEditSchedule() {
+        const id = document.getElementById("edit-sched-id").value
+        const s = state.schedules.find((x) => x.id === id)
+        if (!s) return
+        const totalHours = s.theory_hours + s.practice_hours
+        if (!state.editSchedPeriods.length)
+          return toast("กรุณาเลือกคาบเรียน", "error")
+        const period_start = Math.min(...state.editSchedPeriods)
+        const period_end = Math.max(...state.editSchedPeriods)
+        const count = period_end - period_start + 1
+        // For multi-day subjects, each slot can be any number of periods (no strict enforcement per-slot)
+        if (count < 1)
+          return toast("กรุณาเลือกคาบเรียนอย่างน้อย 1 คาบ", "error")
+        const day = document.getElementById("edit-sched-day").value
+        const room = document.getElementById("edit-sched-room").value
+        const group_code = document.getElementById("edit-sched-group").value
+        try {
+          await api("PUT", "/teacher-schedules/" + id, {
+            day,
+            period_start,
+            period_end,
+            room,
+            group_code,
+          })
+          toast("แก้ไขตารางสอนแล้ว ✅", "success")
+          closeModal("modal-edit-schedule")
+          await loadAll()
+          await renderSchedulePage()
+        } catch (e) {}
+      }
+
+      // =========== TIMETABLE RENDER ===========
+      function renderTimetable(schedules, containerId, options = {}) {
+        const wrap = document.getElementById(containerId)
+        const dayPeriods = {}
+        DAYS.forEach((d) => (dayPeriods[d] = {}))
+        schedules.forEach((s) => {
+          if (!dayPeriods[s.day]) return
+          for (let p = s.period_start; p <= s.period_end; p++)
+            dayPeriods[s.day][p] = s
+        })
+
+        let html = `<div class="scroll-x"><div class="timetable">
+    <div class="timetable-head" style="grid-template-columns:80px repeat(11,1fr)">
+      <div class="tt-head-cell">วัน</div>`
+        for (let p = 1; p <= 11; p++) {
+          html += `<div class="tt-head-cell">คาบ ${p}<br><small>${PERIOD_TIMES[p]}</small></div>`
+        }
+        html += '</div><div class="timetable-body">'
+
+        DAYS.forEach((day) => {
+          html += `<div class="timetable-row" style="grid-template-columns:80px repeat(11,1fr)">
+      <div class="tt-cell tt-day">${day}</div>`
+          let skip = 0
+          for (let p = 1; p <= 11; p++) {
+            const s = dayPeriods[day][p]
+            if (skip > 0) {
+              skip--
+              continue
+            }
+            if (s && s.period_start === p) {
+              const span = s.period_end - s.period_start + 1
+              skip = span - 1
+              const colorClass = subjectColorMap[s.subject_id] || "color-1"
+              html += `<div class="tt-cell" style="grid-column:span ${span}">
+          <div class="tt-subject ${colorClass}">
+            <div style="font-weight:700">${s.subject_code || s.code}</div>
+            <div style="font-size:9px">${(s.subject_name || s.name || "").substring(0, 20)}</div>
+            ${s.room ? `<div style="font-size:9px; opacity:.7">${s.room}</div>` : ""}
+            ${options.showTeacher && s.teacher_name ? `<div style="font-size:9px; opacity:.7">👨‍🏫${s.teacher_name.replace("นาย", "").replace("นางสาว", "")}</div>` : ""}
+          </div>
+        </div>`
+            } else {
+              html += `<div class="tt-cell"></div>`
+            }
+          }
+          html += "</div>"
+        })
+        html += "</div></div></div>"
+        html += `<div style="margin-top:8px; font-size:11px; color:var(--text3);">⏰ พักกลางวัน 12:20 - 13:20 (ระหว่างคาบ 4 และ 5)</div>`
+        wrap.innerHTML = html
+      }
+
+      async function renderTeacherTimetable() {
+        await loadAll()
+        renderTimetable(state.schedules, "teacher-timetable-wrap")
+        const uniqueSubjects = {}
+        state.schedules.forEach((s) => {
+          uniqueSubjects[s.subject_id] = s
+        })
+        const tbody = document.getElementById("teacher-subjects-summary")
+        tbody.innerHTML = Object.values(uniqueSubjects)
+          .map(
+            (s) => `
+    <tr>
+      <td><span class="badge badge-blue">${s.subject_code}</span></td>
+      <td>${s.subject_name}</td>
+      <td>${s.theory_hours}</td><td>${s.practice_hours}</td><td>${s.credits}</td>
+      <td>${s.theory_hours + s.practice_hours} ชม.</td>
+    </tr>`,
+          )
+          .join("")
+      }
+
+      // =========== APPROVAL PAGE ===========
+      async function renderApprovalPage() {
+        await loadAll()
+        if (!state.currentTeacher) {
+          document.getElementById("approve-list").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">👨‍🏫</div>กรุณาเลือกครูก่อน</div>'
+          return
+        }
+        const requests = await api(
+          "GET",
+          "/enrollment-requests/teacher/" + state.currentTeacher.id,
+        )
+        const filtered = requests.filter(
+          (r) => r.status === state.currentApproveTab,
+        )
+
+        // Update pending tab count
+        const pendingCount = requests.filter(
+          (r) => r.status === "pending",
+        ).length
+        const tabBadge = document.getElementById("tab-pending-count")
+        tabBadge.textContent = pendingCount || ""
+        tabBadge.style.display = pendingCount ? "" : "none"
+
+        // Update sidebar badge
+        const badge = document.getElementById("pending-badge")
+        if (pendingCount > 0) {
+          badge.textContent = pendingCount
+          badge.style.display = ""
+        } else badge.style.display = "none"
+
+        const el = document.getElementById("approve-list")
+        if (!filtered.length) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">${state.currentApproveTab === "pending" ? "🕐" : "📋"}</div>${
+            state.currentApproveTab === "pending"
+              ? "ไม่มีคำขอรออนุมัติ"
+              : state.currentApproveTab === "approved"
+                ? "ยังไม่มีที่อนุมัติ"
+                : state.currentApproveTab === "rejected"
+                  ? "ยังไม่มีที่ปฏิเสธ"
+                  : "ยังไม่มีรายการถูกถอน"
+          }</div>`
+          return
+        }
+        el.innerHTML = filtered
+          .map(
+            (r) => `
+    <div class="request-item">
+      <div style="flex:1">
+        <div style="font-weight:600">${r.student_name}</div>
+        <div style="font-size:11px; color:var(--text3)">รหัส: ${r.student_code} | กลุ่ม: ${r.group_code}</div>
+        <div style="font-size:10px; color:var(--text3); margin-top:2px;">ส่งคำขอ: ${new Date(r.created_at).toLocaleDateString("th-TH")} ${r.status === "revoked" ? `| <span style="color:var(--red)">⚠️ ถอนเมื่อ: ${new Date(r.updated_at).toLocaleDateString("th-TH")} เวลา ${new Date(r.updated_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>` : ""}</div>
+      </div>
+      <span class="request-status ${r.status === "pending" ? "req-pending" : r.status === "approved" ? "req-approved" : "req-rejected"}">
+        ${r.status === "pending" ? "⏳ รอ" : r.status === "approved" ? "✅ อนุมัติ" : r.status === "revoked" ? "⚠️ ถูกถอน" : "❌ ปฏิเสธ"}
+      </span>
+      <div style="display: flex; gap: 8px;">
+      ${
+        r.status === "pending"
+          ? `
+        <button class="btn btn-success btn-sm" onclick="approveRequest('${r.id}')">✅ อนุมัติ</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectRequest('${r.id}')">❌ ปฏิเสธ</button>
+      `
+          : r.status === "approved"
+            ? `
+        <button class="btn btn-warning btn-sm" onclick="revokeRequest('${r.id}')">⚠️ ยกเลิกอนุมัติและถอนวิชา</button>
+      `
+            : ""
+      }
+      </div>
+    </div>`,
+          )
+          .join("")
+      }
+
+      function switchApproveTab(tab) {
+        state.currentApproveTab = tab
+        document.querySelectorAll("#page-t-approve .tab").forEach((t, i) => {
+          t.classList.toggle(
+            "active",
+            ["pending", "approved", "rejected", "revoked"][i] === tab, // เพิ่ม "revoked" เข้าไป
+          )
+        })
+        renderApprovalPage()
+      }
+
+      async function approveRequest(id) {
+        await api("PUT", "/enrollment-requests/" + id, { status: "approved" })
+        toast("อนุมัติแล้ว ✅", "success")
+        renderApprovalPage()
+      }
+
+      async function rejectRequest(id) {
+        await api("PUT", "/enrollment-requests/" + id, { status: "rejected" })
+        toast("ปฏิเสธแล้ว", "success")
+        renderApprovalPage()
+      }
+
+      // =========== TEACHER EXPORT PAGE ===========
+      async function renderTeacherExportPage() {
+        await loadAll()
+        const sel = document.getElementById("export-teacher-sel")
+        sel.innerHTML =
+          '<option value="">-- เลือกครู --</option>' +
+          state.teachers
+            .map(
+              (t) =>
+                `<option value="${t.id}" ${state.currentTeacher && t.id === state.currentTeacher.id ? "selected" : ""}>${t.name}</option>`,
+            )
+            .join("")
+        previewTeacherExport()
+      }
+
+      function buildOfficialTimetableHTML(teacher, schedules, semester) {
+        // Build day×period grid
+        const PERIOD_COLS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        const TIMES_START = {
+          1: "07:50",
+          2: "08:20",
+          3: "09:20",
+          4: "10:20",
+          5: "11:20",
+          6: "12:20",
+          7: "13:20",
+          8: "14:20",
+          9: "15:20",
+          10: "16:20",
+          11: "17:20",
+        }
+        const TIMES_END = {
+          1: "08:20",
+          2: "09:20",
+          3: "10:20",
+          4: "11:20",
+          5: "12:20",
+          6: "13:20",
+          7: "14:20",
+          8: "15:20",
+          9: "16:20",
+          10: "17:20",
+          11: "18:20",
+        }
+
+        // Map day+period → schedule
+        const grid = {}
+        DAYS.forEach((d) => (grid[d] = {}))
+        schedules.forEach((s) => {
+          if (grid[s.day]) {
+            for (let p = s.period_start; p <= s.period_end; p++)
+              grid[s.day][p] = s
+          }
+        })
+
+        // Unique subjects list
+        const subjectMap = {}
+        schedules.forEach((s) => {
+          subjectMap[s.subject_id] = s
+        })
+        const subjList = Object.values(subjectMap)
+
+        // Count total hours per subject
+        const hoursMap = {}
+        schedules.forEach((s) => {
+          if (!hoursMap[s.subject_id])
+            hoursMap[s.subject_id] = { theory: 0, practice: 0, credits: 0 }
+          const count = s.period_end - s.period_start + 1
+          hoursMap[s.subject_id].theory = s.theory_hours || 0
+          hoursMap[s.subject_id].practice = s.practice_hours || 0
+          hoursMap[s.subject_id].credits = s.credits || 0
+        })
+
+        // Total hours summed
+        let totalT = 0,
+          totalP = 0,
+          totalC = 0,
+          totalH = 0
+        subjList.forEach((s) => {
+          totalT += s.theory_hours || 0
+          totalP += s.practice_hours || 0
+          totalC += s.credits || 0
+          totalH += (s.theory_hours || 0) + (s.practice_hours || 0)
+        })
+
+        // Build subject rows for left table (show up to 5 per column, 2 columns)
+        let subjectRowsHTML = ""
+        subjList.forEach((s, i) => {
+          subjectRowsHTML += `<tr>
+            <td style="text-align:center;font-size:10px;">${i + 1}</td>
+            <td style="font-size:9px;">${s.subject_code}</td>
+            <td style="font-size:9px;text-align:left;padding-left:3px;">${s.subject_name}</td>
+            <td style="text-align:center;font-size:10px;">${s.theory_hours}</td>
+            <td style="text-align:center;font-size:10px;">${s.practice_hours}</td>
+            <td style="text-align:center;font-size:10px;">${s.credits}</td>
+            <td style="text-align:center;font-size:10px;">${(s.theory_hours || 0) + (s.practice_hours || 0)}</td>
+          </tr>`
+        })
+
+        // Timetable grid rows
+        let gridHTML = ""
+        // Header row: day col + period cols
+        let headCols = `<th style="width:52px;font-size:9px;background:#e8e4f2;">วัน</th>`
+        for (let p = 1; p <= 11; p++) {
+          headCols += `<th style="font-size:9px;background:#e8e4f2;padding:2px 1px;">
+            <div>คาบ ${p}</div>
+            <div style="font-weight:normal;font-size:8px;">${PERIOD_TIMES[p]}</div>
+          </th>`
+        }
+        gridHTML += `<tr>${headCols}</tr>`
+
+        DAYS.forEach((day) => {
+          let row = `<td style="font-weight:700;font-size:10px;text-align:center;background:#f0eef6;padding:4px 2px;">${day}</td>`
+          let skip = 0
+          for (let p = 1; p <= 11; p++) {
+            if (skip > 0) {
+              skip--
+              continue
+            }
+            const s = grid[day][p]
+            if (s && s.period_start === p) {
+              const span = s.period_end - s.period_start + 1
+              skip = span - 1
+              const colors = [
+                "background:#f3e8ff;border-left:3px solid #7c3aed;",
+                "background:#d1fae5;border-left:3px solid #059669;",
+                "background:#dbeafe;border-left:3px solid #3b82f6;",
+                "background:#fef3c7;border-left:3px solid #d97706;",
+                "background:#fce7f3;border-left:3px solid #db2777;",
+                "background:#e0f2fe;border-left:3px solid #0284c7;",
+              ]
+              const subjIdx = subjList.findIndex(
+                (x) => x.subject_id === s.subject_id,
+              )
+              const colorStyle = colors[subjIdx % colors.length] || colors[0]
+              row += `<td colspan="${span}" style="padding:2px;vertical-align:middle;">
+                <div style="${colorStyle}border-radius:3px;padding:2px 3px;font-size:9px;line-height:1.3;text-align:center;">
+                  <div style="font-weight:700;font-size:9px;">${s.subject_code}</div>
+                  <div style="font-size:8px;">${(s.subject_name || "").length > 16 ? (s.subject_name || "").substring(0, 16) + "…" : s.subject_name || ""}</div>
+                  ${s.room ? `<div style="font-size:7px;opacity:.8;">${s.room}</div>` : ""}
+                </div>
+              </td>`
+            } else {
+              row += `<td style="padding:2px;"></td>`
+            }
+          }
+          gridHTML += `<tr style="height:52px;">${row}</tr>`
+        })
+
+        const sem = semester || "2/2568"
+        const now = new Date()
+        const thYear = now.getFullYear() + 543
+
+        return `
+<div id="official-tt-doc" style="font-family:'Sarabun',sans-serif;color:#000;background:#fff;padding:16px;max-width:960px;margin:0 auto;">
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:8px;">
+    <div style="font-size:14px;font-weight:700;">วิทยาลัยเทคนิคน้ำพอง</div>
+    <div style="font-size:13px;">ตารางสอนภาคเรียนที่ ${sem} ปีการศึกษา ${thYear}</div>
+  </div>
+
+  <!-- Teacher info + subject list side by side -->
+  <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+    <tr>
+      <td style="vertical-align:top;width:50%;padding-right:8px;">
+        <table style="width:100%;border-collapse:collapse;border:1px solid #999;font-size:11px;">
+          <tr><td style="padding:3px 6px;border:1px solid #ccc;background:#f5f5f5;font-weight:600;" colspan="2">ข้อมูลครูผู้สอน</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #ccc;width:40%;color:#555;">ชื่อ-สกุล</td><td style="padding:3px 6px;border:1px solid #ccc;font-weight:600;">${teacher.name}</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #ccc;color:#555;">วุฒิการศึกษา</td><td style="padding:3px 6px;border:1px solid #ccc;">${teacher.education || "-"}</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #ccc;color:#555;">แผนกวิชา</td><td style="padding:3px 6px;border:1px solid #ccc;">${teacher.department || "-"}</td></tr>
+          <tr><td style="padding:3px 6px;border:1px solid #ccc;color:#555;">หน้าที่พิเศษ</td><td style="padding:3px 6px;border:1px solid #ccc;">${teacher.special_duty || "-"}</td></tr>
+          <tr>
+            <td style="padding:3px 6px;border:1px solid #ccc;color:#555;">รวมชั่วโมงสอน</td>
+            <td style="padding:3px 6px;border:1px solid #ccc;font-weight:700;">ท.${totalT} ป.${totalP} น.${totalC} รวม ${totalT + totalP} ชม./สัปดาห์</td>
+          </tr>
+        </table>
+      </td>
+      <td style="vertical-align:top;width:50%;">
+        <table style="width:100%;border-collapse:collapse;border:1px solid #999;font-size:10px;">
+          <thead>
+            <tr style="background:#e8e4f2;">
+              <th style="padding:3px 2px;border:1px solid #ccc;width:20px;">#</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;">รหัสวิชา</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;text-align:left;">ชื่อรายวิชา</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;">ท.</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;">ป.</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;">น.</th>
+              <th style="padding:3px 2px;border:1px solid #ccc;">ชม.</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${subjectRowsHTML}
+            <tr style="background:#f5f5f5;font-weight:700;">
+              <td colspan="3" style="padding:3px 4px;border:1px solid #ccc;text-align:right;">รวม</td>
+              <td style="padding:3px 2px;border:1px solid #ccc;text-align:center;">${totalT}</td>
+              <td style="padding:3px 2px;border:1px solid #ccc;text-align:center;">${totalP}</td>
+              <td style="padding:3px 2px;border:1px solid #ccc;text-align:center;">${totalC}</td>
+              <td style="padding:3px 2px;border:1px solid #ccc;text-align:center;">${totalT + totalP}</td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Timetable grid -->
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;border:1px solid #999;table-layout:fixed;">
+      ${gridHTML}
+    </table>
+  </div>
+  <div style="font-size:9px;color:#666;margin-top:4px;">⏰ พักกลางวัน 12:20 - 13:20 (ระหว่างคาบ 4 และ 5)</div>
+
+  <!-- Schedule detail table -->
+  <div style="margin-top:12px;">
+    <div style="font-size:11px;font-weight:700;margin-bottom:4px;">รายละเอียดตารางสอน</div>
+    <table style="width:100%;border-collapse:collapse;font-size:10px;">
+      <thead>
+        <tr style="background:#e8e4f2;">
+          <th style="padding:3px 4px;border:1px solid #ccc;">วัน</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;">คาบ</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;">เวลา</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;">รหัสวิชา</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;text-align:left;">ชื่อวิชา</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;">ห้อง</th>
+          <th style="padding:3px 4px;border:1px solid #ccc;">กลุ่มเรียน</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${schedules
+          .sort(
+            (a, b) =>
+              DAYS.indexOf(a.day) - DAYS.indexOf(b.day) ||
+              a.period_start - b.period_start,
+          )
+          .map(
+            (s) => `
+        <tr>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;">${s.day}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;">คาบ ${s.period_start}-${s.period_end}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;">${PERIOD_TIMES[s.period_start]}-${PERIOD_END[s.period_end]}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;">${s.subject_code}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;">${s.subject_name}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;">${s.room || "-"}</td>
+          <td style="padding:3px 4px;border:1px solid #ccc;text-align:center;font-size:9px;">${s.group_code || "-"}</td>
+        </tr>`,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Signature row -->
+  <table style="width:100%;margin-top:20px;font-size:10px;border-collapse:collapse;">
+    <tr>
+      <td style="text-align:center;width:33%;padding:4px;">
+        <div style="border-top:1px solid #000;display:inline-block;min-width:120px;padding-top:2px;">หัวหน้าแผนกวิชา</div>
+      </td>
+      <td style="text-align:center;width:33%;padding:4px;">
+        <div style="border-top:1px solid #000;display:inline-block;min-width:120px;padding-top:2px;">หัวหน้างานพัฒนาหลักสูตรฯ</div>
+      </td>
+      <td style="text-align:center;width:33%;padding:4px;">
+        <div style="border-top:1px solid #000;display:inline-block;min-width:120px;padding-top:2px;">ผู้อำนวยการ</div>
+      </td>
+    </tr>
+  </table>
+</div>`
+      }
+
+      async function previewTeacherExport() {
+        const teacherId = document.getElementById("export-teacher-sel").value
+        const preview = document.getElementById("teacher-export-preview")
+        if (!teacherId) {
+          preview.innerHTML = ""
+          return
+        }
+        const teacher = state.teachers.find((t) => t.id === teacherId)
+        const schedules = await api(
+          "GET",
+          "/teacher-schedules?teacher_id=" + teacherId,
+        )
+        if (!schedules.length) {
+          preview.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่มีตารางสอน</div>'
+          return
+        }
+        schedules.forEach((s, i) => {
+          if (!subjectColorMap[s.subject_id])
+            subjectColorMap[s.subject_id] = COLORS[i % COLORS.length]
+        })
+        preview.innerHTML = buildOfficialTimetableHTML(teacher, schedules)
+      }
+
+      async function exportTeacherTimetablePrint() {
+        const teacherId = document.getElementById("export-teacher-sel").value
+        if (!teacherId) return toast("กรุณาเลือกครูก่อน", "error")
+        const teacher = state.teachers.find((t) => t.id === teacherId)
+        const schedules = await api(
+          "GET",
+          "/teacher-schedules?teacher_id=" + teacherId,
+        )
+        if (!schedules.length) return toast("ยังไม่มีตารางสอน", "error")
+        const docHTML = buildOfficialTimetableHTML(teacher, schedules)
+        const win = window.open("", "_blank")
+        win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+          <title>ตารางสอน — ${teacher.name}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+          <style>
+            * { margin:0; padding:0; box-sizing:border-box; }
+            body { font-family:'Sarabun',sans-serif; font-size:12px; color:#000; background:#fff; }
+            table { border-collapse:collapse; }
+            @page { size: A4 landscape; margin: 10mm; }
+            @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+          </style></head><body>`)
+        win.document.write(docHTML)
+        win.document.write("</body></html>")
+        win.document.close()
+        setTimeout(() => {
+          win.focus()
+          win.print()
+        }, 800)
+      }
+
+      function exportTeacherCSV() {
+        const teacherId = document.getElementById("export-teacher-sel").value
+        if (!teacherId) return toast("กรุณาเลือกครู", "error")
+        const teacher = state.teachers.find((t) => t.id === teacherId)
+        const schedules = state.schedules.filter ? state.schedules : []
+        // Fetch fresh then export
+        api("GET", "/teacher-schedules?teacher_id=" + teacherId).then(
+          (scheds) => {
+            const rows = [
+              [
+                "รหัสวิชา",
+                "ชื่อวิชา",
+                "วัน",
+                "คาบเริ่ม",
+                "คาบสิ้นสุด",
+                "เวลาเริ่ม",
+                "เวลาสิ้นสุด",
+                "ห้องเรียน",
+                "กลุ่ม",
+              ],
+            ]
+            scheds.forEach((s) =>
+              rows.push([
+                s.subject_code,
+                s.subject_name,
+                s.day,
+                s.period_start,
+                s.period_end,
+                PERIOD_TIMES[s.period_start],
+                PERIOD_END[s.period_end],
+                s.room || "",
+                s.group_code || "",
+              ]),
+            )
+            downloadCSV(rows, `ตารางสอน_${teacher.name}.csv`)
+          },
+        )
+      }
+
+      // =========== STUDENT DASHBOARD ===========
+      async function renderStudentDashboard() {
+        const el = document.getElementById("student-info-card")
+        if (!state.currentStudent) {
+          el.innerHTML = `<div class="empty-state"><div class="empty-icon">👤</div>กรุณาเลือกนักเรียนก่อน
+      <br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="showSelectUserModal()">เลือกนักเรียน</button></div>`
+          document.getElementById("teacher-request-card").style.display = "none"
+          return
+        }
+        document.getElementById("teacher-request-card").style.display = ""
+        const s = state.currentStudent
+        el.innerHTML = `
+    <div class="form-row">
+      <div>
+        <div class="info-row"><span class="info-key">ชื่อ-สกุล</span><span class="info-val">${s.name}</span></div>
+        <div class="info-row"><span class="info-key">รหัสนักเรียน</span><span class="info-val">${s.student_id}</span></div>
+        <div class="info-row"><span class="info-key">กลุ่มเรียน</span><span class="info-val">${s.group_code}</span></div>
+      </div>
+    </div>`
+
+        const regs = await api("GET", "/registrations/" + s.id)
+        state.myRegistrations = regs
+        document.getElementById("s-stat-reg").textContent = regs.length
+        document.getElementById("s-stat-credits").textContent = regs.reduce(
+          (sum, r) => sum + (r.credits || 0),
+          0,
+        )
+
+        // Show enrollment requests for this student
+        await renderStudentRequests()
+
+        // Populate teacher selector — exclude already-approved teachers
+        await loadAll()
+        const existingRequests = await api(
+          "GET",
+          "/enrollment-requests/student/" + s.id,
+        )
+        const approvedTeacherIds = new Set(
+          existingRequests
+            .filter((r) => r.status === "approved")
+            .map((r) => r.teacher_id),
+        )
+        const reqSel = document.getElementById("req-teacher-sel")
+        const availableTeachers = state.teachers.filter(
+          (t) => !approvedTeacherIds.has(t.id),
+        )
+        reqSel.innerHTML =
+          '<option value="">-- เลือกครูผู้สอน --</option>' +
+          availableTeachers
+            .map(
+              (t) =>
+                `<option value="${t.id}">${t.name} (${t.department})</option>`,
+            )
+            .join("")
+        // Hide request section if no teachers available
+        const reqSection =
+          reqSel
+            .closest(".card-body")
+            .querySelector('div[style*="display: flex"]') ||
+          reqSel.parentElement
+        if (!availableTeachers.length) {
+          reqSel.closest('div[style*="flex"]') &&
+            (reqSel.closest('div[style*="flex"]').style.display = "none")
+        }
+      }
+
+      async function renderStudentRequests() {
+        if (!state.currentStudent) return
+        const requests = await api(
+          "GET",
+          "/enrollment-requests/student/" + state.currentStudent.id,
+        )
+        const el = document.getElementById("my-requests-list")
+        if (!requests.length) {
+          el.innerHTML =
+            '<div style="color:var(--text3); font-size:12px; padding:8px 0;">ยังไม่ได้ส่งคำขอ</div>'
+          return
+        }
+        el.innerHTML = requests
+          .map(
+            (r) => `
+    <div class="request-item" style="margin-bottom:8px;">
+      <span>👨‍🏫</span>
+      <div style="flex:1">
+        <div style="font-weight:600; font-size:13px;">${r.teacher_name}</div>
+        <div style="font-size:11px; color:var(--text3);">${r.teacher_dept}</div>
+        ${r.status === "revoked" ? `<div style="font-size:10px; color:var(--red); margin-top:2px;">⚠️ ถอนเมื่อ: ${new Date(r.updated_at).toLocaleDateString("th-TH")} เวลา ${new Date(r.updated_at).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</div>` : ""}
+      </div>
+      <span class="request-status ${r.status === "pending" ? "req-pending" : r.status === "approved" ? "req-approved" : "req-rejected"}">
+        ${r.status === "pending" ? "⏳ รออนุมัติ" : r.status === "approved" ? "✅ อนุมัติแล้ว" : r.status === "revoked" ? "⚠️ ถูกถอนรายวิชา" : "❌ ปฏิเสธ"}
+      </span>
+    </div>`,
+          )
+          .join("")
+      }
+
+      async function sendEnrollmentRequest() {
+        if (!state.currentStudent)
+          return toast("กรุณาเลือกนักเรียนก่อน", "error")
+        const teacherId = document.getElementById("req-teacher-sel").value
+        if (!teacherId) return toast("กรุณาเลือกครูผู้สอน", "error")
+        try {
+          await api("POST", "/enrollment-requests", {
+            student_id: state.currentStudent.id,
+            teacher_id: teacherId,
+          })
+          toast("ส่งคำขอแล้ว รอครูอนุมัติ ✅", "success")
+          await renderStudentRequests()
+        } catch (e) {}
+      }
+
+      // =========== STUDENT REGISTER ===========
+      async function renderStudentRegister() {
+        if (!state.currentStudent) {
+          document.getElementById("available-subjects-panel").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">👤</div>กรุณาเลือกนักเรียนก่อน</div>'
+          return
+        }
+
+        // Check approved teacher
+        const requests = await api(
+          "GET",
+          "/enrollment-requests/student/" + state.currentStudent.id,
+        )
+        const approved = requests.filter((r) => r.status === "approved")
+
+        const infoEl = document.getElementById("student-teacher-info")
+        if (!approved.length) {
+          infoEl.innerHTML = `<div class="card"><div class="card-body" style="text-align:center; padding:24px;">
+      <div style="font-size:36px; margin-bottom:8px;">🕐</div>
+      <div style="color:var(--text2);">กรุณาส่งคำขอลงทะเบียนกับครูผู้สอนก่อน แล้วรอการอนุมัติ</div>
+      <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="navigate('s-dashboard')">ไปส่งคำขอ</button>
+    </div></div>`
+          document.getElementById("available-subjects-panel").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">⏳</div>รอการอนุมัติจากครู</div>'
+          document.getElementById("registered-subjects-panel").innerHTML = ""
+          return
+        }
+
+        // ดึง ID ของครูทุกคนที่อนุมัติแล้วมาเก็บไว้เป็น Array
+        const approvedTeacherIds = approved.map((r) => r.teacher_id)
+
+        infoEl.innerHTML = `<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+    ${approved.map((r) => `<span class="badge badge-green">✅ อนุมัติโดย ${r.teacher_name}</span>`).join("")}
+  </div>`
+
+        // ดึงตารางสอนทั้งหมด (ไม่ต้องส่ง ID ครูคนเดียวแล้ว)
+        let [available, regs] = await Promise.all([
+          api("GET", "/available-schedules/" + state.currentStudent.id),
+          api("GET", "/registrations/" + state.currentStudent.id),
+        ])
+
+        // กรองเอาเฉพาะวิชาที่เปิดสอนโดย "ครูทุกคน" ที่อนุมัติแล้ว
+        available = available.filter((s) =>
+          approvedTeacherIds.includes(s.teacher_id),
+        )
+
+        state.availableSchedules = available
+        state.myRegistrations = regs
+
+        // Auto-register all available subjects
+        if (available.length) {
+          let autoRegistered = 0
+          for (const s of available) {
+            // ตรวจสอบตารางชนก่อนลงทะเบียนอัตโนมัติ
+            const hasConflict = regs.some(
+              (r) =>
+                r.day === s.day &&
+                !(
+                  r.period_end < s.period_start || r.period_start > s.period_end
+                ),
+            )
+
+            if (!hasConflict) {
+              try {
+                await api("POST", "/registrations", {
+                  student_id: state.currentStudent.id,
+                  subject_id: s.subject_id,
+                  teacher_schedule_id: s.id,
+                })
+                autoRegistered++
+                // เพิ่มวิชาที่ลงสำเร็จเข้า regs ชั่วคราวเพื่อเช็คชนในลูปถัดไป
+                regs.push({
+                  ...s,
+                  period_start: s.period_start,
+                  period_end: s.period_end,
+                  day: s.day,
+                })
+              } catch (e) {}
+            }
+          }
+          if (autoRegistered > 0) {
+            toast(`ลงทะเบียนอัตโนมัติ ${autoRegistered} วิชา ✅`, "success")
+            // Reload after auto-register
+            const resData = await Promise.all([
+              api("GET", "/available-schedules/" + state.currentStudent.id),
+              api("GET", "/registrations/" + state.currentStudent.id),
+            ])
+            available = resData[0].filter((s) =>
+              approvedTeacherIds.includes(s.teacher_id),
+            )
+            regs = resData[1]
+            state.availableSchedules = available
+            state.myRegistrations = regs
+          }
+        }
+
+        const avEl = document.getElementById("available-subjects-panel")
+        const regEl = document.getElementById("registered-subjects-panel")
+
+        if (!available.length) {
+          avEl.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">🎉</div>ลงทะเบียนครบทุกวิชาแล้ว</div>'
+        } else {
+          avEl.innerHTML = available
+            .map((s) => {
+              const colorClass =
+                subjectColorMap[s.subject_id || s.id] || "color-1"
+
+              const hasConflict = regs.some(
+                (r) =>
+                  r.day === s.day &&
+                  !(
+                    r.period_end < s.period_start ||
+                    r.period_start > s.period_end
+                  ),
+              )
+
+              if (hasConflict) {
+                return `<div class="drag-item" style="opacity:0.6; cursor:not-allowed;">
+                  <div class="tt-subject ${colorClass}" style="width:8px; height:40px; border-radius:4px; flex-shrink:0;"></div>
+                  <div style="flex:1">
+                    <div class="subject-code">${s.subject_code}</div>
+                    <div class="subject-name">${s.subject_name}</div>
+                    <div style="font-size:10px; color:var(--text3)">${s.day} คาบ ${s.period_start}-${s.period_end} | ${s.room || "-"}</div>
+                    <div style="font-size:10px; color:var(--red); font-weight:600; margin-top:2px;">⚠️ เวลาเรียนชนกับวิชาอื่น</div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" disabled>+ ลง</button>
+                </div>`
+              } else {
+                return `<div class="drag-item" style="cursor:pointer" onclick="registerSubject('${s.id}','${s.subject_id}')">
+                  <div class="tt-subject ${colorClass}" style="width:8px; height:40px; border-radius:4px; flex-shrink:0;"></div>
+                  <div style="flex:1">
+                    <div class="subject-code">${s.subject_code}</div>
+                    <div class="subject-name">${s.subject_name}</div>
+                    <div style="font-size:10px; color:var(--text3)">${s.day} คาบ ${s.period_start}-${s.period_end} | ${s.room || "-"} | ${s.credits} น.</div>
+                  </div>
+                  <button class="btn btn-success btn-sm">+ ลง</button>
+                </div>`
+              }
+            })
+            .join("")
+        }
+
+        if (!regs.length) {
+          regEl.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่ได้ลงทะเบียนวิชาใด</div>'
+        } else {
+          regEl.innerHTML = regs
+            .map((r) => {
+              const colorClass = subjectColorMap[r.subject_id] || "color-1"
+              return `<div class="drag-item">
+        <div class="tt-subject ${colorClass}" style="width:8px; height:40px; border-radius:4px; flex-shrink:0;"></div>
+        <div style="flex:1">
+          <div class="subject-code">${r.subject_code}</div>
+          <div class="subject-name">${r.subject_name}</div>
+          <div style="font-size:10px; color:var(--text3)">${r.day} คาบ ${r.period_start}-${r.period_end} | ${r.room || "-"} | ครู${r.teacher_name}</div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="unregisterSubject('${r.id}')">ถอน</button>
+      </div>`
+            })
+            .join("")
+        }
+      }
+
+      async function registerSubject(scheduleId, subjectId) {
+        if (!state.currentStudent)
+          return toast("กรุณาเลือกนักเรียนก่อน", "error")
+        try {
+          await api("POST", "/registrations", {
+            student_id: state.currentStudent.id,
+            subject_id: subjectId,
+            teacher_schedule_id: scheduleId,
+          })
+          toast("ลงทะเบียนวิชาสำเร็จ", "success")
+          renderStudentRegister()
+        } catch (e) {}
+      }
+
+      async function unregisterSubject(regId) {
+        if (!confirm("ต้องการถอนวิชานี้?")) return
+        await api("DELETE", "/registrations/" + regId)
+        toast("ถอนวิชาแล้ว", "success")
+        renderStudentRegister()
+      }
+
+      async function renderStudentTimetable() {
+        if (!state.currentStudent) {
+          document.getElementById("student-timetable-wrap").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">👤</div>กรุณาเลือกนักเรียนก่อน</div>'
+          return
+        }
+        const regs = await api(
+          "GET",
+          "/registrations/" + state.currentStudent.id,
+        )
+        if (!regs.length) {
+          document.getElementById("student-timetable-wrap").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่ได้ลงทะเบียนวิชาใด<br><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="navigate(\'s-register\')">ลงทะเบียนเลย</button></div>'
+          return
+        }
+        renderTimetable(regs, "student-timetable-wrap", { showTeacher: true })
+      }
+
+      // =========== STUDENT EXPORT PAGE ===========
+      async function renderStudentExportPage() {
+        if (!state.currentStudent) {
+          document.getElementById("student-export-preview").innerHTML =
+            '<div class="empty-state"><div class="empty-icon">👤</div>กรุณาเลือกนักเรียนก่อน</div>'
+          return
+        }
+        const s = state.currentStudent
+        document.getElementById("s-export-info").textContent =
+          `นักเรียน: ${s.name} | รหัส: ${s.student_id} | กลุ่ม: ${s.group_code}`
+        const regs = await api("GET", "/registrations/" + s.id)
+        const preview = document.getElementById("student-export-preview")
+        if (!regs.length) {
+          preview.innerHTML =
+            '<div class="empty-state"><div class="empty-icon">📋</div>ยังไม่ได้ลงทะเบียนวิชาใด</div>'
+          return
+        }
+        preview.innerHTML = `
+    <div class="card">
+      <div class="card-header"><div class="card-title">📋 ตัวอย่างตารางเรียน — ${s.name}</div></div>
+      <div class="card-body">
+        <div id="s-export-tt-wrap"></div>
+        <div style="margin-top:16px;">
+          <table>
+            <thead><tr><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>วัน</th><th>คาบ</th><th>เวลา</th><th>ห้อง</th><th>ครูผู้สอน</th><th>น.</th></tr></thead>
+            <tbody>${regs
+              .sort(
+                (a, b) =>
+                  DAYS.indexOf(a.day) - DAYS.indexOf(b.day) ||
+                  a.period_start - b.period_start,
+              )
+              .map(
+                (r) => `
+              <tr><td>${r.subject_code}</td><td>${r.subject_name}</td><td>${r.day}</td>
+              <td>คาบ${r.period_start}-${r.period_end}</td>
+              <td>${PERIOD_TIMES[r.period_start]}-${PERIOD_END[r.period_end]}</td>
+              <td>${r.room || "-"}</td><td>${r.teacher_name || "-"}</td><td>${r.credits}</td></tr>`,
+              )
+              .join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`
+        renderTimetable(regs, "s-export-tt-wrap", { showTeacher: true })
+      }
+
+      function exportStudentTimetablePrint() {
+        const preview = document.getElementById("student-export-preview")
+        if (!preview || !preview.innerHTML.trim())
+          return toast("ไม่มีข้อมูลตารางเรียน", "error")
+        const infoText =
+          document.getElementById("s-export-info")?.textContent || ""
+        const win = window.open("", "_blank")
+        win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+          <title>ตารางเรียน</title>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+          <style>
+            body { font-family: 'Sarabun', sans-serif; font-size: 13px; color: #000; background:#fff; padding:20px; }
+            table { border-collapse: collapse; width:100%; }
+            th, td { border: 1px solid #999; padding: 5px 8px; text-align: center; }
+            th { background: #eee; font-weight: 600; }
+            @media print { body { padding: 10px; } }
+          </style></head><body>`)
+        if (infoText)
+          win.document.write(
+            `<p style="margin-bottom:12px; font-weight:600;">${infoText}</p>`,
+          )
+        win.document.write(preview.innerHTML)
+        win.document.write("</body></html>")
+        win.document.close()
+        win.onload = () => {
+          win.focus()
+          win.print()
+        }
+      }
+
+      function exportStudentCSV() {
+        if (!state.currentStudent) return
+        const s = state.currentStudent
+        api("GET", "/registrations/" + s.id).then((regs) => {
+          const rows = [
+            [
+              "รหัสวิชา",
+              "ชื่อวิชา",
+              "วัน",
+              "คาบเริ่ม",
+              "คาบสิ้นสุด",
+              "เวลาเริ่ม",
+              "เวลาสิ้นสุด",
+              "ห้องเรียน",
+              "ครูผู้สอน",
+              "หน่วยกิต",
+            ],
+          ]
+          regs.forEach((r) =>
+            rows.push([
+              r.subject_code,
+              r.subject_name,
+              r.day,
+              r.period_start,
+              r.period_end,
+              PERIOD_TIMES[r.period_start],
+              PERIOD_END[r.period_end],
+              r.room || "",
+              r.teacher_name || "",
+              r.credits,
+            ]),
+          )
+          downloadCSV(rows, `ตารางเรียน_${s.name}.csv`)
+        })
+      }
+
+      function downloadCSV(rows, filename) {
+        const bom = "\uFEFF" // UTF-8 BOM for Thai
+        const csv =
+          bom +
+          rows
+            .map((r) =>
+              r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","),
+            )
+            .join("\n")
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(url)
+        toast("ดาวน์โหลด CSV แล้ว ✅", "success")
+      }
+
+      // =========== SELECT USER MODAL ===========
+      async function showSelectUserModal() {
+        await loadAll()
+        const isTeacher = state.mode === "teacher"
+        document.getElementById("add-teacher-section").style.display = isTeacher
+          ? ""
+          : "none"
+        document.getElementById("add-student-section").style.display = isTeacher
+          ? "none"
+          : ""
+
+        const el = document.getElementById("user-select-list")
+        if (isTeacher) {
+          el.innerHTML = `
+      <div style="font-size:12px; color:var(--text3); margin-bottom:8px;">เลือกครูผู้สอน:</div>
+      ${state.teachers
+        .map(
+          (t) => `
+        <div class="drag-item" onclick="selectTeacher('${t.id}')" style="cursor:pointer; ${state.currentTeacher?.id === t.id ? "border-color:var(--accent)" : ""}">
+          <span>👨‍🏫</span>
+          <div>
+            <div style="font-weight:600">${t.name}</div>
+            <div style="font-size:11px; color:var(--text3)">${t.department} | ${t.special_duty}</div>
+          </div>
+          ${state.currentTeacher?.id === t.id ? '<span class="badge badge-blue">✓ ใช้งานอยู่</span>' : ""}
+        </div>`,
+        )
+        .join("")}`
+        } else {
+          el.innerHTML = `
+      <div style="font-size:12px; color:var(--text3); margin-bottom:8px;">เลือกนักเรียน:</div>
+      ${state.students
+        .map(
+          (s) => `
+        <div class="drag-item" onclick="selectStudent('${s.id}')" style="cursor:pointer; ${state.currentStudent?.id === s.id ? "border-color:var(--green)" : ""}">
+          <span>👨‍🎓</span>
+          <div>
+            <div style="font-weight:600">${s.name}</div>
+            <div style="font-size:11px; color:var(--text3)">${s.student_id} | ${s.group_code}</div>
+          </div>
+          ${state.currentStudent?.id === s.id ? '<span class="badge badge-green">✓ ใช้งานอยู่</span>' : ""}
+        </div>`,
+        )
+        .join("")}`
+        }
+        openModal("modal-select-user")
+      }
+
+      // function selectTeacher(id) {
+      //   state.currentTeacher = state.teachers.find((t) => t.id === id)
+      //   updateUserInfo()
+      //   closeModal("modal-select-user")
+      //   toast("เลือกครู: " + state.currentTeacher.name, "success")
+      //   // Reload schedules for this teacher
+      //   api("GET", "/teacher-schedules?teacher_id=" + id).then((scheds) => {
+      //     state.schedules = scheds
+      //   })
+      // }
+
+      // function selectStudent(id) {
+      //   state.currentStudent = state.students.find((s) => s.id === id)
+      //   updateUserInfo()
+      //   closeModal("modal-select-user")
+      //   toast("เลือกนักเรียน: " + state.currentStudent.name, "success")
+      //   navigate("s-dashboard")
+      // }
+
+      async function selectTeacher(id) {
+        state.currentTeacher = state.teachers.find((t) => t.id === id)
+        updateUserInfo()
+        closeModal("modal-select-user")
+        toast("เลือกครู: " + state.currentTeacher.name, "success")
+
+        // 1. บังคับโหลดข้อมูลใหม่ทั้งหมดจากหลังบ้านของครูคนนี้
+        await loadAll()
+
+        // 2. ค้นหาว่าตอนนี้เปิดหน้าไหนอยู่
+        let activePageId = "t-dashboard" // ค่าเริ่มต้น
+        document.querySelectorAll(".page").forEach((p) => {
+          if (p.classList.contains("active")) {
+            activePageId = p.id.replace("page-", "")
+          }
+        })
+
+        // 3. สั่งวาดหน้านั้นใหม่ด้วยข้อมูลใหม่
+        navigate(activePageId)
+      }
+
+      async function selectStudent(id) {
+        state.currentStudent = state.students.find((s) => s.id === id)
+        updateUserInfo()
+        closeModal("modal-select-user")
+        toast("เลือกนักเรียน: " + state.currentStudent.name, "success")
+
+        // 1. บังคับโหลดข้อมูลใหม่ทั้งหมด
+        await loadAll()
+
+        // 2. ค้นหาว่าตอนนี้เปิดหน้าไหนอยู่ของนักเรียน
+        let activePageId = "s-dashboard" // ค่าเริ่มต้น
+        document.querySelectorAll(".page").forEach((p) => {
+          if (p.classList.contains("active")) {
+            activePageId = p.id.replace("page-", "")
+          }
+        })
+
+        // 3. สั่งวาดหน้านั้นใหม่ด้วยข้อมูลใหม่
+        navigate(activePageId)
+      }
+
+      async function addTeacher() {
+        const name = document.getElementById("new-teacher-name").value.trim()
+        const department = document
+          .getElementById("new-teacher-dept")
+          .value.trim()
+        const education = document
+          .getElementById("new-teacher-edu")
+          .value.trim()
+        const special_duty = document
+          .getElementById("new-teacher-duty")
+          .value.trim()
+        if (!name) return toast("กรุณากรอกชื่อครู", "error")
+        try {
+          const newTeacher = await api("POST", "/teachers", {
+            name,
+            department,
+            education,
+            special_duty,
+          })
+          state.teachers.push(newTeacher)
+          state.currentTeacher = newTeacher
+          updateUserInfo()
+          // Clear inputs
+          ;[
+            "new-teacher-name",
+            "new-teacher-dept",
+            "new-teacher-edu",
+            "new-teacher-duty",
+          ].forEach((id) => (document.getElementById(id).value = ""))
+          closeModal("modal-select-user")
+          toast("เพิ่มครูแล้ว: " + name, "success")
+          navigate("t-dashboard")
+        } catch (e) {}
+      }
+
+      async function addStudent() {
+        const student_id = document.getElementById("new-std-id").value.trim()
+        const name = document.getElementById("new-std-name").value.trim()
+        const group_code = document.getElementById("new-std-group").value.trim()
+        if (!student_id || !name)
+          return toast("กรุณากรอกรหัสและชื่อนักเรียน", "error")
+        try {
+          const newStudent = await api("POST", "/students", {
+            student_id,
+            name,
+            group_code,
+          })
+          state.students.push(newStudent)
+          state.currentStudent = newStudent
+          updateUserInfo()
+          closeModal("modal-select-user")
+          toast("เพิ่มนักเรียนแล้ว: " + name, "success")
+          navigate("s-dashboard")
+        } catch (e) {}
+      }
+
+      // =========== CONFIRM MODAL ===========
+      function showConfirmModal(title, msg, onConfirm) {
+        document.getElementById("confirm-title").textContent = title
+        document.getElementById("confirm-msg").innerHTML = msg
+        const btn = document.getElementById("confirm-ok-btn")
+        btn.onclick = async () => {
+          closeModal("modal-confirm")
+          await onConfirm()
+        }
+        openModal("modal-confirm")
+      }
+
+      // =========== MODAL HELPERS ===========
+      function openModal(id) {
+        document.getElementById(id).style.display = "flex"
+      }
+      function closeModal(id) {
+        document.getElementById(id).style.display = "none"
+      }
+
+      document.querySelectorAll(".modal-overlay").forEach((m) => {
+        m.addEventListener("click", (e) => {
+          if (e.target === m) m.style.display = "none"
+        })
+      })
+
+      // =========== TOAST ===========
+      function toast(msg, type = "success") {
+        const container = document.getElementById("toast-container")
+        const el = document.createElement("div")
+        el.className = `toast ${type}`
+        el.innerHTML = `<span>${type === "success" ? "✅" : "❌"}</span><span>${msg}</span>`
+        container.appendChild(el)
+        setTimeout(() => {
+          el.style.animation = "slideOut .2s ease forwards"
+          setTimeout(() => el.remove(), 200)
+        }, 3000)
+      }
+
+      // =========== EDIT PERIOD PICKER EVENT DELEGATION ===========
+      document.addEventListener("click", function (e) {
+        const btn = e.target.closest(
+          "#edit-period-picker .edit-period-btn[data-period]",
+        )
+        if (!btn) return
+        const p = +btn.dataset.period
+        toggleEditPeriod(p)
+      })
+
+      // =========== SETTINGS ===========
+      async function loadConfig() {
+        try {
+          const cfg = await api("GET", "/config")
+          state.config = cfg
+          updateSemesterDisplay()
+        } catch (e) {}
+      }
+
+      function updateSemesterDisplay() {
+        const el = document.getElementById("semester-display")
+        if (el)
+          el.textContent = "ภาคเรียน " + (state.config.semester || "2/2568")
+
+        // อัปเดตชื่อสถาบันที่ Sidebar
+        const sidebarName = document.getElementById("sidebar-school-name")
+        if (sidebarName) {
+          sidebarName.textContent =
+            state.config.school_name || "วิทยาลัยเทคนิคน้ำพอง"
+        }
+
+        // Also update document title
+        document.title =
+          (state.config.school_name || "วิทยาลัยเทคนิคน้ำพอง") +
+          " — ระบบลงทะเบียนเรียน"
+      }
+
+      async function showSettingsModal(firstTime) {
+        if (!firstTime && state.mode !== "teacher") {
+          toast("เฉพาะครูเท่านั้น", "error")
+          return
+        }
+        await loadConfig()
+        const sem = state.config.semester || ""
+        const parts = sem.split("/")
+        document.getElementById("settings-semester-term").value =
+          parts[0] || "2"
+        document.getElementById("settings-semester-year").value =
+          parts[1] || new Date().getFullYear() + 543 + ""
+        document.getElementById("settings-school-name").value =
+          state.config.school_name || "วิทยาลัยเทคนิคน้ำพอง"
+        // Adjust modal for first-time vs normal edit
+        const titleEl = document.querySelector("#modal-settings .modal-title")
+        if (titleEl)
+          titleEl.textContent = firstTime
+            ? "⚙️ ตั้งค่าเริ่มต้นก่อนใช้งาน"
+            : "⚙️ ตั้งค่าระบบ"
+        const cancelBtn = document.querySelector(
+          "#modal-settings .modal-footer .btn-ghost",
+        )
+        if (cancelBtn) cancelBtn.style.display = firstTime ? "none" : ""
+        openModal("modal-settings")
+      }
+
+      async function saveSettings() {
+        const term = document.getElementById("settings-semester-term").value
+        const year = document
+          .getElementById("settings-semester-year")
+          .value.trim()
+        const schoolName = document
+          .getElementById("settings-school-name")
+          .value.trim()
+        if (!year || !/^\d{4}$/.test(year))
+          return toast("กรุณากรอกปีการศึกษาให้ถูกต้อง (4 หลัก)", "error")
+
+        const semester = term + "/" + year
+        await api("PUT", "/config", { semester, school_name: schoolName })
+
+        state.config.semester = semester
+        state.config.school_name = schoolName
+        state.config.is_configured = true // เพิ่มบรรทัดนี้
+
+        updateSemesterDisplay()
+        closeModal("modal-settings")
+        toast(`บันทึกการตั้งค่าแล้ว: ภาคเรียน ${semester}`, "success")
+      }
+
+      async function revokeRequest(id) {
+        showConfirmModal(
+          "⚠️ ยืนยันการยกเลิกอนุมัติ",
+          "ต้องการยกเลิกสิทธิ์นักเรียนคนนี้ใช่หรือไม่?<br><span style='color:var(--red); font-size:12px; margin-top:8px; display:inline-block;'>* วิชาเรียนทั้งหมดที่นักเรียนคนนี้เคยลงทะเบียนกับคุณ จะถูกถอนออกโดยอัตโนมัติ!</span>",
+          async () => {
+            try {
+              await api("POST", "/enrollment-requests/" + id + "/revoke")
+              toast("ยกเลิกอนุมัติและถอนรายวิชาเรียบร้อยแล้ว", "success")
+              await loadAll() // ดึงข้อมูลสถิติใหม่
+              renderApprovalPage()
+            } catch (e) {}
+          },
+        )
+      }
+
+      // =========== START ===========
+      init()
+    </script>
+  </body>
+</html>

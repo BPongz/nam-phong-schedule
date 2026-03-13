@@ -1,0 +1,11 @@
+{
+  "subjects": [],
+  "teachers": [],
+  "teacher_schedules": [],
+  "students": [],
+  "student_registrations": [],
+  "enrollment_requests": [],
+  "config": {
+    "teacher_pin": "@dmin"
+  }
+}
