@@ -12,6 +12,8 @@ let state = {
   teachers: [],
   schedules: [],
   students: [],
+  groups: [],
+  rooms: [],
   myRegistrations: [],
   availableSchedules: [],
   selectedPeriods: [],
@@ -77,14 +79,18 @@ async function init() {
 
 async function loadAll() {
   const teacherId = state.currentTeacher ? state.currentTeacher.id : undefined
-  const [subjects, teachers, students] = await Promise.all([
+  const [subjects, teachers, students, groups, rooms] = await Promise.all([
     api("GET", "/subjects"),
     api("GET", "/teachers"),
     api("GET", "/students"),
+    api("GET", "/groups"),
+    api("GET", "/rooms"),
   ])
   state.subjects = subjects
   state.teachers = teachers
   state.students = students
+  state.groups = groups
+  state.rooms = rooms
   const schedPath = teacherId
     ? `/teacher-schedules?teacher_id=${teacherId}`
     : "/teacher-schedules"
@@ -169,6 +175,8 @@ function navigate(page) {
   const titles = {
     "t-dashboard": "ภาพรวม",
     "t-subjects": "จัดการรายวิชา",
+    "t-groups": "จัดการกลุ่มเรียน",
+    "t-rooms": "จัดการห้องเรียน",
     "t-schedule": "ลงตารางสอน",
     "t-timetable": "ตารางสอน",
     "t-approve": "อนุมัตินักเรียน",
@@ -188,6 +196,8 @@ function navigate(page) {
   })
   if (page === "t-dashboard") renderTeacherDashboard()
   else if (page === "t-subjects") renderSubjectsTable()
+  else if (page === "t-groups") renderGroupsPage()
+  else if (page === "t-rooms") renderRoomsPage()
   else if (page === "t-schedule") renderSchedulePage()
   else if (page === "t-timetable") renderTeacherTimetable()
   else if (page === "t-approve") renderApprovalPage()

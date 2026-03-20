@@ -1,6 +1,8 @@
 {
   "subjects": [],
   "teachers": [],
+  "groups": [],
+  "rooms": [],
   "teacher_schedules": [],
   "students": [],
   "student_registrations": [],

@@ -335,7 +335,7 @@ async function renderStudentExportPage() {
   <div id="s-export-tt-wrap"></div>
   <div style="margin-top:16px;">
     <table>
-      <thead><tr><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>วัน</th><th>คาบ</th><th>เวลา</th><th>ห้อง</th><th>ครูผู้สอน</th><th>น.</th></tr></thead>
+      <thead><tr><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>วัน</th><th>คาบ</th><th>เวลา</th><th>ห้อง</th><th>ครูผู้สอน</th></tr></thead>
       <tbody>${regs
         .sort(
           (a, b) =>
@@ -347,7 +347,7 @@ async function renderStudentExportPage() {
         <tr><td>${r.subject_code}</td><td>${r.subject_name}</td><td>${r.day}</td>
         <td>คาบ${r.period_start}-${r.period_end}</td>
         <td>${PERIOD_TIMES[r.period_start]}-${PERIOD_END[r.period_end]}</td>
-        <td>${r.room || "-"}</td><td>${r.teacher_name || "-"}</td><td>${r.credits}</td></tr>`,
+        <td>${r.room || "-"}</td><td>${r.teacher_name || "-"}</td></tr>`,
         )
         .join("")}
       </tbody>
@@ -359,33 +359,127 @@ async function renderStudentExportPage() {
 }
 
 function exportStudentTimetablePrint() {
-  const preview = document.getElementById("student-export-preview")
-  if (!preview || !preview.innerHTML.trim())
-    return toast("ไม่มีข้อมูลตารางเรียน", "error")
-  const infoText =
-    document.getElementById("s-export-info")?.textContent || ""
+  if (!state.currentStudent) return toast("ไม่มีข้อมูลตารางเรียน", "error")
+  const s = state.currentStudent
+  const regs = state.myRegistrations
+  if (!regs || !regs.length) return toast("ยังไม่ได้ลงทะเบียนวิชาใด", "error")
+
+  // สีวิชา (6 สี)
+  const PRINT_COLORS = [
+    { bg: "#ede9fe", color: "#5b21b6", border: "#c4b5fd" },
+    { bg: "#d1fae5", color: "#065f46", border: "#6ee7b7" },
+    { bg: "#dbeafe", color: "#1e40af", border: "#93c5fd" },
+    { bg: "#fef3c7", color: "#92400e", border: "#fcd34d" },
+    { bg: "#fee2e2", color: "#991b1b", border: "#fca5a5" },
+    { bg: "#e0f2fe", color: "#0c4a6e", border: "#7dd3fc" },
+  ]
+  const colorKeys = Object.keys(subjectColorMap)
+  const getColor = (subjectId) => {
+    const idx = parseInt((subjectColorMap[subjectId] || "color-1").replace("color-", "")) - 1
+    return PRINT_COLORS[idx] || PRINT_COLORS[0]
+  }
+
+  // สร้าง map วัน → คาบ → schedule
+  const dayPeriods = {}
+  DAYS.forEach((d) => (dayPeriods[d] = {}))
+  regs.forEach((r) => {
+    for (let p = r.period_start; p <= r.period_end; p++)
+      dayPeriods[r.day][p] = r
+  })
+
+  // สร้าง timetable grid (HTML table)
+  const PERIODS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  let ttRows = ""
+  DAYS.forEach((day) => {
+    let cells = `<td style="font-weight:700;background:#f3f4f6;padding:6px 10px;border:1px solid #d1d5db;white-space:nowrap;font-size:12px;">${day}</td>`
+    let skip = 0
+    PERIODS.forEach((p) => {
+      if (skip > 0) { skip--; return }
+      if (p === 5) {
+        cells += `<td style="background:#fafafa;border:1px solid #d1d5db;text-align:center;font-size:10px;color:#9ca3af;">พัก</td>`
+        return
+      }
+      const r = dayPeriods[day][p]
+      if (r && r.period_start === p) {
+        const span = r.period_end - r.period_start + 1
+        skip = span - 1
+        const c = getColor(r.subject_id)
+        cells += `<td colspan="${span}" style="border:1px solid #d1d5db;padding:4px;text-align:center;background:${c.bg};color:${c.color};">
+          <div style="font-weight:700;font-size:11px;">${r.subject_code}</div>
+          <div style="font-size:9px;line-height:1.3;">${(r.subject_name || "").substring(0, 18)}</div>
+          ${r.room ? `<div style="font-size:9px;opacity:.8;">${r.room}</div>` : ""}
+          ${r.teacher_name ? `<div style="font-size:9px;opacity:.7;">${r.teacher_name.replace("นาย","").replace("นางสาว","").replace("นาง","")}</div>` : ""}
+        </td>`
+      } else {
+        cells += `<td style="border:1px solid #d1d5db;"></td>`
+      }
+    })
+    ttRows += `<tr>${cells}</tr>`
+  })
+
+  const ttHeadCells = PERIODS.map((p) =>
+    p === 5
+      ? `<th style="background:#f3f4f6;border:1px solid #d1d5db;padding:5px 3px;font-size:10px;color:#6b7280;">☕<br>พัก</th>`
+      : `<th style="background:#f3f4f6;border:1px solid #d1d5db;padding:5px 3px;font-size:10px;min-width:52px;">คาบ${p}<br><span style="font-weight:400;color:#6b7280;">${PERIOD_TIMES[p]}</span></th>`
+  ).join("")
+
+  // สร้าง list table
+  const listRows = [...regs]
+    .sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || a.period_start - b.period_start)
+    .map((r) => `<tr>
+      <td>${r.subject_code}</td>
+      <td style="text-align:left;">${r.subject_name}</td>
+      <td>${r.day}</td>
+      <td>คาบ ${r.period_start}–${r.period_end}</td>
+      <td>${PERIOD_TIMES[r.period_start]}–${PERIOD_END[r.period_end]}</td>
+      <td>${r.room || "-"}</td>
+      <td>${r.teacher_name || "-"}</td>
+    </tr>`).join("")
+
   const win = window.open("", "_blank")
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <title>ตารางเรียน</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-      body { font-family: 'Sarabun', sans-serif; font-size: 13px; color: #000; background:#fff; padding:20px; }
-      table { border-collapse: collapse; width:100%; }
-      th, td { border: 1px solid #999; padding: 5px 8px; text-align: center; }
-      th { background: #eee; font-weight: 600; }
-      @media print { body { padding: 10px; } }
-    </style></head><body>`)
-  if (infoText)
-    win.document.write(
-      `<p style="margin-bottom:12px; font-weight:600;">${infoText}</p>`,
-    )
-  win.document.write(preview.innerHTML)
-  win.document.write("</body></html>")
+  <title>ตารางเรียน — ${s.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Sarabun', sans-serif; font-size: 13px; color: #111; background: #fff; padding: 24px; }
+    h2 { margin: 0 0 4px; font-size: 16px; }
+    .sub { font-size: 12px; color: #555; margin-bottom: 16px; }
+    .section-title { font-weight: 700; font-size: 13px; margin: 18px 0 8px; color: #374151; }
+    .tt-wrap { overflow-x: auto; margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d1d5db; padding: 5px 8px; text-align: center; font-size: 12px; }
+    thead th { background: #f3f4f6; font-weight: 600; }
+    tbody tr:nth-child(even) { background: #f9fafb; }
+    .note { font-size: 11px; color: #6b7280; margin-top: 8px; }
+    @media print {
+      body { padding: 10px; }
+      .tt-wrap { overflow: visible; }
+    }
+  </style></head><body>
+  <h2>ตารางเรียน — ${s.name}</h2>
+  <div class="sub">กลุ่มเรียน: ${s.group_code || "-"} &nbsp;|&nbsp; ปีการศึกษา: ${state.config?.semester || ""}</div>
+
+  <div class="section-title">📅 ตารางเรียน</div>
+  <div class="tt-wrap">
+    <table style="min-width:700px;">
+      <thead><tr>
+        <th style="background:#f3f4f6;min-width:60px;">วัน</th>
+        ${ttHeadCells}
+      </tr></thead>
+      <tbody>${ttRows}</tbody>
+    </table>
+  </div>
+  <div class="note">⏰ พักกลางวัน 12:20 – 13:20 (ระหว่างคาบ 4 และ 5)</div>
+
+  <div class="section-title">📋 รายวิชาที่ลงทะเบียน</div>
+  <table>
+    <thead><tr><th>รหัสวิชา</th><th>ชื่อวิชา</th><th>วัน</th><th>คาบ</th><th>เวลา</th><th>ห้อง</th><th>ครูผู้สอน</th></tr></thead>
+    <tbody>${listRows}</tbody>
+  </table>
+</body></html>`)
   win.document.close()
-  win.onload = () => {
-    win.focus()
-    win.print()
-  }
+  win.onload = () => { win.focus(); win.print() }
 }
 
 function exportStudentCSV() {
@@ -403,7 +497,6 @@ function exportStudentCSV() {
         "เวลาสิ้นสุด",
         "ห้องเรียน",
         "ครูผู้สอน",
-        "หน่วยกิต",
       ],
     ]
     regs.forEach((r) =>
@@ -417,7 +510,6 @@ function exportStudentCSV() {
         PERIOD_END[r.period_end],
         r.room || "",
         r.teacher_name || "",
-        r.credits,
       ]),
     )
     downloadCSV(rows, `ตารางเรียน_${s.name}.csv`)

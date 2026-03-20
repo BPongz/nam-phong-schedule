@@ -1,3 +1,50 @@
+// คาบ 5 เป็นพักกลางวัน — ไม่นับเป็นชั่วโมงสอน
+function countSlotHours(start, end) {
+  if (!start || !end) return 0
+  let h = end - start + 1
+  if (start <= 5 && end >= 5) h-- // หักคาบพัก
+  return h
+}
+
+function buildRoomOptions(selectedValue = "") {
+  return state.rooms
+    .map(
+      (r) =>
+        `<option value="${r.name}" ${r.name === selectedValue ? "selected" : ""}>${r.name}</option>`,
+    )
+    .join("")
+}
+
+function populateRoomSelect(id, selectedValue = "") {
+  const sel = document.getElementById(id)
+  if (!sel) return
+  sel.innerHTML =
+    '<option value="">-- เลือกห้อง --</option>' + buildRoomOptions(selectedValue)
+}
+
+function buildRoomSelectHTML(slotIdx, selectedValue = "") {
+  const opts =
+    '<option value="">-- เลือกห้อง --</option>' + buildRoomOptions(selectedValue)
+  return `<select onchange="updateSlot(${slotIdx},'room',this.value)" style="width:110px;">${opts}</select>`
+}
+
+function buildGroupOptions(selectedValue = "") {
+  return state.groups
+    .map(
+      (g) =>
+        `<option value="${g.code}" ${g.code === selectedValue ? "selected" : ""}>${g.code}</option>`,
+    )
+    .join("")
+}
+
+function populateGroupSelect(id, selectedValue = "") {
+  const sel = document.getElementById(id)
+  if (!sel) return
+  sel.innerHTML =
+    '<option value="">-- เลือกกลุ่ม --</option>' +
+    buildGroupOptions(selectedValue)
+}
+
 // =========== SCHEDULE PAGE ===========
 async function renderSchedulePage() {
   await loadAll()
@@ -139,6 +186,8 @@ async function renderSchedulePage() {
       .join("")
   if (state.currentTeacher) tsel.value = state.currentTeacher.id
 
+  populateGroupSelect("sched-group")
+
   renderSchedulesTable()
   renderSchedDaySlots()
 }
@@ -209,16 +258,14 @@ async function renderSchedDaySlots() {
   if (subjectId && teacherId) {
     state.schedules.forEach((s) => {
       if (s.subject_id === subjectId && s.teacher_id === teacherId) {
-        prevHours += s.period_end - s.period_start + 1
+        prevHours += countSlotHours(s.period_start, s.period_end)
       }
     })
   }
 
   // 2. คำนวณชั่วโมงที่กำลังเลือกในฟอร์มปัจจุบัน
   const formHours = state.schedDaySlots.reduce((sum, sl) => {
-    if (sl.periodStart && sl.periodEnd)
-      return sum + (sl.periodEnd - sl.periodStart + 1)
-    return sum
+    return sum + countSlotHours(sl.periodStart, sl.periodEnd)
   }, 0)
 
   // 3. เอาชั่วโมงเก่า + ชั่วโมงใหม่
@@ -268,13 +315,20 @@ async function renderSchedDaySlots() {
         sl.periodStart && sl.periodEnd
           ? `คาบ ${sl.periodStart}-${sl.periodEnd} (${PERIOD_TIMES[sl.periodStart]}–${PERIOD_END[sl.periodEnd]})`
           : "ยังไม่ได้เลือกคาบ"
-      const occSet = occupiedByDay[sl.day] || new Set()
+      // รวมคาบที่ slot อื่น (วันเดียวกัน) เลือกไปแล้วในฟอร์มด้วย
+      const occSet = new Set(occupiedByDay[sl.day] || [])
+      state.schedDaySlots.forEach((other, otherIdx) => {
+        if (otherIdx !== idx && other.day === sl.day && other.periodStart && other.periodEnd) {
+          for (let p = other.periodStart; p <= other.periodEnd; p++)
+            occSet.add(p)
+        }
+      })
       return `<div style="background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:12px; position:relative;">
       <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
         <select onchange="updateSlot(${idx},'day',this.value)" style="flex:1; min-width:100px;">
           ${["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"].map((d) => `<option ${sl.day === d ? "selected" : ""}>${d}</option>`).join("")}
         </select>
-        <input placeholder="ห้อง เช่น ชย102" value="${sl.room || ""}" oninput="updateSlot(${idx},'room',this.value)" style="width:110px;" />
+        ${buildRoomSelectHTML(idx, sl.room || "")}
         ${state.schedDaySlots.length > 1 ? `<button class="btn btn-danger btn-sm" onclick="removeSchedSlot(${idx})">🗑</button>` : ""}
       </div>
       <div style="font-size:11px; color:var(--text3); margin-bottom:4px;">คาบ 1-4 = 08:20-12:20 | คาบ 6-11 = 14:20-20:20 &nbsp;·&nbsp; <span style="color:#b91c1c">🔒 = คาบไม่ว่าง</span></div>
@@ -296,22 +350,6 @@ async function renderSchedDaySlots() {
 }
 
 function updateSlot(idx, key, val) {
-  if (key === "day") {
-    const duplicate = state.schedDaySlots.some(
-      (s, i) => i !== idx && s.day === val,
-    )
-    if (duplicate) {
-      toast(`วัน${val}มีอยู่แล้ว ไม่สามารถเลือกซ้ำได้`, "error")
-      // Reset select back to current value
-      const cont = document.getElementById("sched-day-slots")
-      if (cont) {
-        const selects = cont.querySelectorAll("select")
-        if (selects[idx])
-          selects[idx].value = state.schedDaySlots[idx].day
-      }
-      return
-    }
-  }
   state.schedDaySlots[idx][key] = val
   renderSchedDaySlots()
 }
@@ -335,6 +373,14 @@ function toggleSlotPeriod(slotIdx, p) {
         sl.periodEnd = null
       }
     } else {
+      // ป้องกันข้ามคาบพัก (period 5)
+      if (newStart < 5 && newEnd > 5) {
+        toast(
+          "คาบนี้อยู่คนละฝั่งพักกลางวัน — กรุณากด ➕ เพิ่มวันสอน เพื่อเลือกคาบบ่ายแยกต่างหาก",
+          "error",
+        )
+        return
+      }
       sl.periodStart = newStart
       sl.periodEnd = newEnd
     }
@@ -343,15 +389,11 @@ function toggleSlotPeriod(slotIdx, p) {
 }
 
 function addSchedDaySlot() {
-  const usedDays = new Set(state.schedDaySlots.map((s) => s.day))
-  const ALL_DAYS = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์"]
-  if (usedDays.size >= ALL_DAYS.length) {
-    toast("เพิ่มช่วงวันครบทุกวันแล้ว (5 วัน)", "error")
-    return
-  }
-  const nextDay = ALL_DAYS.find((d) => !usedDays.has(d)) || "จันทร์"
+  // หยิบวันล่าสุดที่ใช้ไว้เป็นค่าเริ่มต้น เพื่อรองรับกรณีเพิ่มช่วงเช้า/บ่ายในวันเดียวกัน
+  const lastDay =
+    state.schedDaySlots[state.schedDaySlots.length - 1]?.day || "จันทร์"
   state.schedDaySlots.push({
-    day: nextDay,
+    day: lastDay,
     periodStart: null,
     periodEnd: null,
     room: "",
@@ -385,7 +427,7 @@ async function addSchedule() {
   let prevHours = 0
   state.schedules.forEach((s) => {
     if (s.subject_id === subjectId && s.teacher_id === teacherId) {
-      prevHours += s.period_end - s.period_start + 1
+      prevHours += countSlotHours(s.period_start, s.period_end)
     }
   })
 
@@ -397,7 +439,7 @@ async function addSchedule() {
 
   // คำนวณชั่วโมงที่เลือกในฟอร์มปัจจุบัน
   const formHours = slots.reduce(
-    (sum, sl) => sum + (sl.periodEnd - sl.periodStart + 1),
+    (sum, sl) => sum + countSlotHours(sl.periodStart, sl.periodEnd),
     0,
   )
 
@@ -555,8 +597,8 @@ function editSchedule(id) {
   document.getElementById("edit-sched-total-hours").textContent =
     s.theory_hours + s.practice_hours
   document.getElementById("edit-sched-day").value = s.day
-  document.getElementById("edit-sched-room").value = s.room || ""
-  document.getElementById("edit-sched-group").value = s.group_code || ""
+  populateRoomSelect("edit-sched-room", s.room || "")
+  populateGroupSelect("edit-sched-group", s.group_code || "")
   // Store context for conflict check
   state._editId = id
   state._editTeacherId = s.teacher_id

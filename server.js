@@ -30,6 +30,8 @@ db.defaults({
   students: [],
   student_registrations: [],
   enrollment_requests: [],
+  groups: [],
+  rooms: [],
   config: { teacher_pin: "@dmin" },
 }).write()
 
@@ -682,6 +684,48 @@ app.delete("/api/teacher-schedules/:id", (req, res) => {
   res.json({ success: true })
 })
 
+// ---- ROOMS ----
+app.get("/api/rooms", (_req, res) => {
+  res.json(db.get("rooms").sortBy("name").value())
+})
+
+app.post("/api/rooms", (req, res) => {
+  const { name } = req.body
+  if (!name || !name.trim())
+    return res.status(400).json({ error: "กรุณากรอกชื่อห้องเรียน" })
+  if (db.get("rooms").find({ name: name.trim() }).value())
+    return res.status(400).json({ error: "ห้องเรียนนี้มีอยู่แล้ว" })
+  const room = { id: uuidv4(), name: name.trim() }
+  db.get("rooms").push(room).write()
+  res.json(room)
+})
+
+app.delete("/api/rooms/:id", (req, res) => {
+  db.get("rooms").remove({ id: req.params.id }).write()
+  res.json({ success: true })
+})
+
+// ---- GROUPS ----
+app.get("/api/groups", (_req, res) => {
+  res.json(db.get("groups").sortBy("code").value())
+})
+
+app.post("/api/groups", (req, res) => {
+  const { code } = req.body
+  if (!code || !code.trim())
+    return res.status(400).json({ error: "กรุณากรอกรหัสกลุ่มเรียน" })
+  if (db.get("groups").find({ code: code.trim() }).value())
+    return res.status(400).json({ error: "รหัสกลุ่มนี้มีอยู่แล้ว" })
+  const group = { id: uuidv4(), code: code.trim() }
+  db.get("groups").push(group).write()
+  res.json(group)
+})
+
+app.delete("/api/groups/:id", (req, res) => {
+  db.get("groups").remove({ id: req.params.id }).write()
+  res.json({ success: true })
+})
+
 // ---- STUDENTS ----
 app.get("/api/students", (req, res) => {
   res.json(db.get("students").sortBy("student_id").value())
@@ -689,7 +733,7 @@ app.get("/api/students", (req, res) => {
 
 app.post("/api/students", (req, res) => {
   const { student_id, name, group_code } = req.body
-  if (db.get("students").find({ student_id }).value())
+  if (student_id && db.get("students").find({ student_id }).value())
     return res.status(400).json({ error: "รหัสนักเรียนซ้ำ" })
   const student = {
     id: uuidv4(),

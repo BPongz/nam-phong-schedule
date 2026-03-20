@@ -43,6 +43,7 @@ ${state.students
   )
   .join("")}`
   }
+  if (!isTeacher) populateGroupSelect("new-std-group")
   openModal("modal-select-user")
 }
 
@@ -145,8 +146,8 @@ async function addTeacher() {
 async function addStudent() {
   const name = document.getElementById("new-std-name").value.trim()
   const group_code = document.getElementById("new-std-group").value.trim()
-  if (!name)
-    return toast("กรุณากรอกชื่อนักเรียน", "error")
+  if (!name) return toast("กรุณากรอกชื่อ-สกุลนักเรียน", "error")
+  if (!group_code) return toast("กรุณาเลือกกลุ่มเรียน", "error")
   try {
     const newStudent = await api("POST", "/students", {
       name,
@@ -155,6 +156,8 @@ async function addStudent() {
     state.students.push(newStudent)
     state.currentStudent = newStudent
     updateUserInfo()
+    document.getElementById("new-std-name").value = ""
+    populateGroupSelect("new-std-group")
     closeModal("modal-select-user")
     toast("เพิ่มนักเรียนแล้ว: " + name, "success")
     navigate("s-dashboard")

@@ -100,9 +100,9 @@ function buildOfficialTimetableHTML(teacher, schedules, semester) {
   // Timetable grid rows
   let gridHTML = ""
   // Header row: day col + period cols
-  let headCols = `<th style="width:52px;font-size:9px;background:#e8e4f2;">วัน</th>`
+  let headCols = `<th style="width:52px;font-size:9px;background:#e8e4f2;border:1px solid #999;">วัน</th>`
   for (let p = 1; p <= 11; p++) {
-    headCols += `<th style="font-size:9px;background:#e8e4f2;padding:2px 1px;">
+    headCols += `<th style="font-size:9px;background:#e8e4f2;padding:2px 1px;border:1px solid #999;">
       <div>คาบ ${p}</div>
       <div style="font-weight:normal;font-size:8px;">${PERIOD_TIMES[p]}</div>
     </th>`
@@ -110,7 +110,7 @@ function buildOfficialTimetableHTML(teacher, schedules, semester) {
   gridHTML += `<tr>${headCols}</tr>`
 
   DAYS.forEach((day) => {
-    let row = `<td style="font-weight:700;font-size:10px;text-align:center;background:#f0eef6;padding:4px 2px;">${day}</td>`
+    let row = `<td style="font-weight:700;font-size:10px;text-align:center;background:#f0eef6;padding:4px 2px;border:1px solid #999;">${day}</td>`
     let skip = 0
     for (let p = 1; p <= 11; p++) {
       if (skip > 0) {
@@ -133,7 +133,7 @@ function buildOfficialTimetableHTML(teacher, schedules, semester) {
           (x) => x.subject_id === s.subject_id,
         )
         const colorStyle = colors[subjIdx % colors.length] || colors[0]
-        row += `<td colspan="${span}" style="padding:2px;vertical-align:middle;">
+        row += `<td colspan="${span}" style="padding:2px;vertical-align:middle;border:1px solid #999;">
           <div style="${colorStyle}border-radius:3px;padding:2px 3px;font-size:9px;line-height:1.3;text-align:center;">
             <div style="font-weight:700;font-size:9px;">${s.subject_code}</div>
             <div style="font-size:8px;">${(s.subject_name || "").length > 16 ? (s.subject_name || "").substring(0, 16) + "…" : s.subject_name || ""}</div>
@@ -141,7 +141,7 @@ function buildOfficialTimetableHTML(teacher, schedules, semester) {
           </div>
         </td>`
       } else {
-        row += `<td style="padding:2px;"></td>`
+        row += `<td style="padding:2px;border:1px solid #999;"></td>`
       }
     }
     gridHTML += `<tr style="height:52px;">${row}</tr>`
@@ -310,7 +310,10 @@ async function exportTeacherTimetablePrint() {
       body { font-family:'Sarabun',sans-serif; font-size:12px; color:#000; background:#fff; }
       table { border-collapse:collapse; }
       @page { size: A4 landscape; margin: 10mm; }
-      @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+      @media print {
+        body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        td, th { border:1px solid #999 !important; }
+      }
     </style></head><body>`)
   win.document.write(docHTML)
   win.document.write("</body></html>")

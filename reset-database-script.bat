@@ -14,6 +14,8 @@ echo [2/2] Resetting school.json to empty state...
 echo {
 echo   "subjects": [],
 echo   "teachers": [],
+echo   "groups": [],
+echo   "rooms": [],
 echo   "teacher_schedules": [],
 echo   "students": [],
 echo   "student_registrations": [],
